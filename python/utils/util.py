@@ -3,7 +3,7 @@ from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from utils.transform import readIndexBool
 from get_data.getCarraBasedOnVedur import callCarra
 from processing.filterAndShiftCarra import filterAndShiftFile
-from math import sqrt
+from math import sqrt, dist
 import pandas as pd
 from tqdm import tqdm
 from get_data.getCarraBasedOnVedur import callCarra
@@ -139,8 +139,21 @@ def getVariablesNeededForCallCarra(filename: str, outputDirectory: str = "/mnt/d
     print(f"OutputfilePath is {outputFilePath}")
     return year, month, day, time, outputFilePath, file
 
+def getDistances(point, points) -> list[float]:
+    return [dist(point, p) for p in points]
+
+def getWeights(distances, T, d) -> list[float]:
+    res = [(1-di/T) / d for di in distances]
+    return res
+
 def flattenList(lst: list[list]) -> list:
     flatten_list = []
     for row in lst:
         flatten_list.extend(row)
     return flatten_list
+
+def flattenTo2dPoint(nested_list: list):
+    res = []
+    for sublist in nested_list:
+        res.extend(sublist)
+    return res

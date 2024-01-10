@@ -1,11 +1,12 @@
 from utils.util import findRelevantCarraFiles
 from utils.bridging import bridgeSpatialCarra, bridgeCarraTemporal, findBoundingPoints
-from utils.elevation import findLandscapeDistribution, findLandscapeElevation
+from utils.elevation import findLandscapeDistribution, findLandscapeElevationPoints
 import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 import os
-import pickle
+from pprint import pprint as pp
+from geopy.distance import geodesic
 
 def bridgeForHeightLevel(bounding_points: list, prev_df: pd.DataFrame, aft_df: pd.DataFrame, lat: float, lon: float, 
                          features_to_bridge: list, vedurDateTime: str, height_level: float) -> list[float]:
@@ -38,14 +39,14 @@ def bridgeForHeightLevel(bounding_points: list, prev_df: pd.DataFrame, aft_df: p
 
     return bridged_features
 
-def getDTLatLonDir(row: pd.DataFrame) -> list:
+def getDTLatLonDirFFg(row: pd.DataFrame) -> list:
     """
     Args:
         row (DataFrame) : A row from a dataframe
     Returns:
-        The datetime, latitude and longitude.
+        The datetime, latitude and longitude and direction
     """
-    return row['timi'], row['lat'], row['lon'], row['d']
+    return row['timi'], row['lat'], row['lon'], float(row['d']), float(row['f']), float(row['fg'])
 
 def combineHeightLevels(cRow15: list, cRow150: list, cRow250: list, cRow500: list, landscape_elevation: list):
     """
@@ -54,8 +55,8 @@ def combineHeightLevels(cRow15: list, cRow150: list, cRow250: list, cRow500: lis
         cRow150 (list): a list representing a single row for given datetime, lat, lon at height_level = 150.0m
         cRow250 (list): a list representing a single row for given datetime, lat, lon at height_level = 250.0m
         cRow500 (list): a list representing a single row for given datetime, lat, lon at height_level = 500.0m
-        landscape_bridged: a nested list representing all the 70 (assuming 10 in dist and 7 angles) points bridged
-            in direction of wind representing the landscape
+        landscape_bridged: a list representing all the 70 (assuming 10 in dist and 7 angles) points elevation points in distribution
+                            in direction of landscape
     Returns:
         A single list containing all the relevant information from each height level that will the be a single row
         in the dataset to be used with model (additional information maybe added or information removed, derivatives like Ri, N
@@ -72,10 +73,7 @@ def combineHeightLevels(cRow15: list, cRow150: list, cRow250: list, cRow500: lis
     combined = [DT, lat, lon, wdir15, t15, ws15, pres15, wdir150, t150, ws150, pres150, 
             wdir250, t250, ws250, pres250, wdir500, t500, ws500, pres500]
     
-    flatten = [item for sub in landscape_elevation for item in sub]
-
-
-    combined.extend(flatten)
+    combined.extend(landscape_elevation)
 
     return combined
 
@@ -96,23 +94,41 @@ def combineAllVedurCarraLandscape(vedurPath: str, outputPath: str, columns = ['D
     """
     vedurDF = pd.read_feather(vedurPath)
     combinedRows = []
-    columns = columns + ["Landscape_" + str(i) for i in range(70)]
+    columns = ["target"] + columns + ["Landscape_" + str(i) for i in range(70)]
+
+    df = vedurDF[vedurDF.stod == '1475']
+
+    print("number of 1475 occ: ", len(df))
+    exit()
 
 
     for index, row in tqdm(vedurDF.iterrows(), total = vedurDF.shape[0]):
         try:
-            vedurDateTime, lat, lon, d = getDTLatLonDir(row)
-            cRow15, cRow150, cRow250, cRow500, landscape_elevation = combineVedurAndCarraRow(vedurDateTime, lat, lon, d)
+            vedurDateTime, lat, lon, d, f, fg = getDTLatLonDirFFg(row)
+            stod = row['stod']
+            print(stod, type(stod))
+            if stod != 1475:
+                continue
+            
+            cRow15, cRow150, cRow250, cRow500, landscape_elevation = combineVedurAndCarraLandscapeRow(vedurDateTime, lat, lon, d)
+
+            if stod == 1475 and d < 30:
+                print("landscape elevation:")
+                pp(landscape_elevation)
+                exit()
+
             aRow = combineHeightLevels(cRow15, cRow150, cRow250, cRow500, landscape_elevation)
-            combinedRows.append(aRow)
+            combinedRows.append([fg/f] + aRow)
         except Exception as e:
             print(f"Not able to get row {index}, with exception: {e}")
+        if not index % 1000:
+            print(combinedRows[-5:])
     df = pd.DataFrame(combinedRows, columns = columns)
     df.to_feather(outputPath)
 
 # Find create a single line in data for model
 # Each line is one feature vector, given information about Carra and Vedur stations
-def combineVedurAndCarraRow(vedurDateTime: str, lat: float, lon: float, d: float = 45, gridSpacing: float = 2500, features_to_bridge = ["wdir", "t", "ws", "pres"]) -> list:
+def combineVedurAndCarraLandscapeRow(vedurDateTime: str, lat: float, lon: float, d: float = 45, gridSpacing: float = 2500, features_to_bridge = ["wdir", "t", "ws", "pres"]) -> list:
     """
     Args:
         vedurDateTime (str): The string representation of the measurement by Vedurstofa
@@ -125,9 +141,11 @@ def combineVedurAndCarraRow(vedurDateTime: str, lat: float, lon: float, d: float
     """
     prev, aft = findRelevantCarraFiles(vedurDateTime)
     prev_df, aft_df = pd.read_feather(prev), pd.read_feather(aft)
+
     bounding_points = findBoundingPoints((lat, lon), prev_df)
     landscapePoints = findLandscapeDistribution((lat, lon), d)
-    landscape_elevation = [[findLandscapeElevation(point) for point in row] for row in landscapePoints]
+    
+    landscape_elevation = findLandscapeElevationPoints(landscapePoints)
 
     bP15, bP150, bP250, bP500 = bounding_points
 
@@ -160,7 +178,12 @@ def resetFeatherFileIndex(feather_directory: str = "/mnt/d/Skóli/lokaverkefni_v
         if isinstance(df.index, pd.MultiIndex):
             df = df.reset_index()
             df.to_feather(feather_directory + file)
-        
+
+def haversine_distance(coord1, coord2):
+    return geodesic(coord1, coord2)
+
+
+
 #resetFeatherFileIndex()
 
 combineAllVedurCarraLandscape("/mnt/d/Skóli/lokaverkefni_vel/data/Vedurstofa/stripped_10min.feather", "/mnt/d/Skóli/lokaverkefni_vel/data/combinedTest.feather")

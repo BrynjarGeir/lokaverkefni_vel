@@ -1,9 +1,8 @@
 from scipy.interpolate import griddata
 from datetime import datetime
-from math import exp, log, cos, sin, pi
-import numpy as np
-import pandas as pd
-
+from rasterio.windows import Window
+import numpy as np, pandas as pd
+from utils.util import getDistances, getWeights, flattenList
 
 def findBoundingPoints(point: tuple[float], df: pd.DataFrame, gridSpacing: float = 2500) -> list:
     """
@@ -30,6 +29,30 @@ def findBoundingPoints(point: tuple[float], df: pd.DataFrame, gridSpacing: float
 
     return bP15, bP150, bP250, bP500
 
+def bridgeElevation(point: tuple[float], w: Window, coordinates: list[list[float]]) -> float:
+    """
+    Args:
+        point (tuple[float]): the point to be looked at in isn93
+        w (Window): a window of a dataset containing the elevation of points surrounding a given point
+    Returns:
+        A single value representing the elevation at given point
+    """
+    try:
+        w_flattened = flattenList(w)
+        distances = getDistances(point, coordinates)
+        T, d = sum(distances), len(w_flattened)
+        weights = getWeights(distances, T, d-1)
+
+
+        assert(round(sum(weights),6) == 1)
+
+        res = sum([weights[i] * w_flattened[i] for i in range(d)])
+
+        return res
+    except Exception as e:
+        print(f"Unable to bridge elevation with exception {e} and the length of the w was {len(w)}")
+        print(w)
+
 # Find all 8 relevant Carrapoints for a given point by vedurstofa
 # i.e. the four points closest to given point for two closest times in Carra (because Carra is on 3 hour interval)
 # b is before and a is after
@@ -50,7 +73,7 @@ def getCarraPointsToBridge(x, y, gridIndex, grid_dist = 2500):
 def bridgeSpatialCarra(x, y, points, features_to_bridge):
     interp_features = []
     for feature in features_to_bridge:
-        interp = bridgeSpatialCarraFeature(y, x, points, feature)
+        interp = bridgeSpatialCarraFeature(x, y, points, feature)
         interp_features.append(interp.item(0))
     return interp_features
 
