@@ -75,7 +75,7 @@ def tooClose(dt1, dt2, threshold):
 
 # Take the stripped by a limit dataframe and limit the information from it so that for a given weatherstation we won't have the same
 # weather twice or more, that is I won't have any two observations that are within threshold seconds of each other
-def stripToDifferentWeathers(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather', threshold: int = 60*60*6):
+def stripToDifferentWeathers(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather', threshold: int = 60*60*24):
     vedurDF = pd.read_feather(vedurPath)
     vedurDF.timi = pd.to_datetime(vedurDF.timi)
     vedurDF = vedurDF.sort_values(by=['stod', 'timi', 'f'])
@@ -85,7 +85,7 @@ def stripToDifferentWeathers(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/V
     vedurDF.timi = pd.to_datetime(vedurDF.timi)
 
     print(f"The length of the dataframe is now {len(vedurDF)} but used to be {n}. This is a shrinking to {len(vedurDF) / n * 100}% of original size.")
-    vedurDF.to_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_6klst_10min.feather')
+    vedurDF.to_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather')
 
 def iterativeFilteredDF(vedurDF, threshold):
     filteredDF, prev_row = pd.DataFrame(columns = vedurDF.columns), None

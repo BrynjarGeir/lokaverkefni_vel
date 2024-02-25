@@ -8,7 +8,7 @@ def getDTXYDFFD(row):
     return row.timi, row.X, row.Y, row.d, row.f, row.fg
 
 #'D:/Skóli/lokaverkefni_vel/data/Carra/allCarra.feather'
-def combineVedurCarraElevData(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather', carraPath: str = 'D:/Skóli/lokaverkefni_vel/data/Carra/Feather/2013-05-18-12_00.feather', tifPath: str = 'D:/Skóli/lokaverkefni_vel/data/elevationPoints/IslandsDEMv1.0_50x50m_isn93_zmasl.tif'):
+def combineVedurCarraElevData(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather', carraPath: str = 'D:/Skóli/lokaverkefni_vel/data/Carra/Feather/2013-05-18-12_00.feather', tifPath: str = 'D:/Skóli/lokaverkefni_vel/data/elevationPoints/IslandsDEMv1.0_20x20m_isn93_zmasl.tif'):
     vedurDF = pd.read_feather(vedurPath)
     carraDF = pd.read_feather(carraPath)
 
