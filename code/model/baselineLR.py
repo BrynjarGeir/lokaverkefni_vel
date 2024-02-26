@@ -6,13 +6,24 @@
     #      dtype='object')
 
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import pandas as pd, numpy as np
+import tensorflow as tf
 
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combinedWTargetAndDesc-4-1-24.feather')
-y = df['gust_factor']
-X = df.drop(['_merge', 'f', 'fg', 'stod', 'gust_factor'], axis = 1)
+def mean_absolute_percentage_error(y_true, y_pred):
+    return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0
+
+#df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/merged-test1month-26-2-24.feather')
+df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+df = df[df.f < df.fg]
+
+y = df['fg']/df['f']
+X = df.drop(['_merge', 'gust_factor', 'f', 'fg', 'd', 'stod'] + [f'Landscape_{i}' for i in range(70)], axis = 1)
+
+# Changing the type of X,y so as to work with Tensorflow
+X, y = X.values.astype(np.float32), y.values.astype(np.float32)
+
+scaler = StandardScaler()
 
 # Assuming 'X' is your feature matrix and 'y' is your target variable
 # Replace 'X' and 'y' with your actual data
@@ -20,17 +31,37 @@ X = df.drop(['_merge', 'f', 'fg', 'stod', 'gust_factor'], axis = 1)
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.fit_transform(X_test)
+
 # Create a linear regression model
-model = LinearRegression()
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.Dense(units = 128, activation = 'relu', input_shape = (X_train.shape[1],)),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(units = 64, activation = 'relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(units = 32, activation = 'relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(units = 1, activation = 'linear')
+
+    ]
+) #LinearRegression()
+
+model.compile(optimizer='adam', loss=mean_absolute_percentage_error)
+
 
 # Train the model
-model.fit(X_train, y_train)
-
-# Make predictions on the test set
-y_pred = model.predict(X_test)
+model.fit(X_train, y_train, epochs = 100, batch_size = 256, validation_data = (X_test, y_test))
 
 # Evaluate the model
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f'Mean Squared Error: {mse}')
-print(f'R2 score is: {r2}')
+mape = model.evaluate(X_test, y_test)
+
+y_predict = model.predict(X_test)
+
+print(y_predict[:5], y_test[:5])
+
+print(f'Test MAPE: {mape}%')
