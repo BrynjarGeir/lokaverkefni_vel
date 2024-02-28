@@ -7,8 +7,7 @@
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import pandas as pd, numpy as np
-import tensorflow as tf
+import pandas as pd, numpy as np, tensorflow as tf
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0

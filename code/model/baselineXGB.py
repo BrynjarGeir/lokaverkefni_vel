@@ -30,33 +30,33 @@ X_test = scaler.fit_transform(X_test)
 
 model = XGBRegressor(eval_metric = mean_absolute_percentage_error)
 
-#param_grid = {
-    #'learning_rate': [0.01, 0.1, 0.2],
-    #'max_depth': [3, 4, 5],
-    #'n_estimators': [50, 100, 200],
-    #'subsample': [0.8, 0.9, 1.0],
-    #'colsample_bytree': [0.8, 0.9, 1.0]
-#}
+param_grid = {
+    'learning_rate': [0.01, 0.1, 0.2],
+    'max_depth': [3, 4, 5],
+    'n_estimators': [50, 100, 200],
+    'subsample': [0.8, 0.9, 1.0],
+    'colsample_bytree': [0.8, 0.9, 1.0]
+}
 
-#gridSearch = GridSearchCV(
-    #estimator=model,
-    #param_grid=param_grid,
-    #scoring = 'neg_mean_squared_error',
-    #cv = 5,
-    #n_jobs = -1
-#)
+gridSearch = GridSearchCV(
+    estimator=model,
+    param_grid=param_grid,
+    scoring = 'neg_mean_squared_error',
+    cv = 5,
+    n_jobs = -1
+)
 
-model.fit(X_train, y_train)
+#model.fit(X_train, y_train)
 
-#gridSearch.fit(X_train, y_train)
+gridSearch.fit(X_train, y_train)
 
-#best_params = gridSearch.best_params_
+best_params = gridSearch.best_params_
 
-#final_model = XGBRegressor(**best_params)
-#final_model.fit(X_train, y_train)
+final_model = XGBRegressor(**best_params)
+final_model.fit(X_train, y_train)
 
-y_predict = model.predict(X_test)
-#y_predict = final_model.predict(X_test)
+#y_predict = model.predict(X_test)
+y_predict = final_model.predict(X_test)
 
 
 # Evaluate the model
