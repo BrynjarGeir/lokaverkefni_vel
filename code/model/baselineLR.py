@@ -12,12 +12,17 @@ import pandas as pd, numpy as np, tensorflow as tf
 def mean_absolute_percentage_error(y_true, y_pred):
     return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0
 
-#df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/merged-test1month-26-2-24.feather')
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+df = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather')
 df = df[df.f < df.fg]
+df['gust_factor'] = df.fg / df.f
+df = df.dropna()
+df = df.drop(['f', 'fg', 'fsdev', 'd', 'dsdev', 'longitude', 'latitude', 'X', 'Y', 'time', 'stod'], axis = 1)# + [f'Landscape_{i}' for i in range(70)], axis = 1)
 
-y = df['fg']/df['f']
-X = df.drop(['_merge', 'gust_factor', 'f', 'fg', 'd', 'stod'] + [f'Landscape_{i}' for i in range(70)], axis = 1)
+
+y = df.gust_factor
+X = df.drop(['gust_factor'], axis = 1)
+X = X.drop(['ws_15', 'ws_250', 'ws_500', 'wd_15', 'wd_250', 'wd_500', 'p_15', 'p_250', 'p_500', 't_15', 't_250', 't_500', 'N_01', 'N_12'], axis = 1)
+
 
 # Changing the type of X,y so as to work with Tensorflow
 X, y = X.values.astype(np.float32), y.values.astype(np.float32)
@@ -54,13 +59,14 @@ model.compile(optimizer='adam', loss=mean_absolute_percentage_error)
 
 
 # Train the model
-model.fit(X_train, y_train, epochs = 100, batch_size = 256, validation_data = (X_test, y_test))
+model.fit(X_train, y_train, epochs = 50, batch_size = 128, validation_data = (X_test, y_test))
 
 # Evaluate the model
 mape = model.evaluate(X_test, y_test)
 
 y_predict = model.predict(X_test)
 
-print(y_predict[:5], y_test[:5])
-
 print(f'Test MAPE: {mape}%')
+
+model.save('./model/saved_models/baselineLR.keras')
+

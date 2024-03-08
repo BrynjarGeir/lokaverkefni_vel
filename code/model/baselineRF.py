@@ -1,17 +1,33 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+import pandas as pd, tensorflow as tf, numpy as np
 
-y = df['gust_factor']
-X = df.drop(['_merge', 'f', 'fg', 'stod', 'gust_factor'], axis = 1)
+def mean_absolute_percentage_error(y_true, y_pred):
+    return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0
 
-seed = 42
-test_size = 0.2
+df = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather')
+df = df[df.f < df.fg]
+df = df.dropna()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
+y = df['fg']/df['f']
+X = df.drop(['f', 'fg', 'fsdev', 'd', 'dsdev', 'longitude', 'latitude', 'X', 'Y', 'time', 'stod'], axis = 1)# + [f'Landscape_{i}' for i in range(70)], axis = 1)
+
+# Changing the type of X,y so as to work with Tensorflow
+X, y = X.values.astype(np.float32), y.values.astype(np.float32)
+
+scaler = StandardScaler()
+
+# Assuming 'X' is your feature matrix and 'y' is your target variable
+# Replace 'X' and 'y' with your actual data
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.fit_transform(X_test)
 
 model = RandomForestRegressor()
 

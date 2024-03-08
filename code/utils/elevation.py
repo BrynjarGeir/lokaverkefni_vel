@@ -38,6 +38,20 @@ def findLandscapeDistribution(point: tuple[float], d: float = 45, n: int = 20, k
     assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {point}"
     return points
 # Returns the landscape elevation using the the stationsPoints dictionary (from the pickled files)
+def generateLandscapeDistrbution(row, d: float = 45, n: int = 20, k: int = 10,
+                               angleRange: list[float] = [-15, -10, -5, 0, 5, 10, 15]) -> np.array:
+    X, Y, d = row.X, row.Y, row.d
+    angles = [(angle + (90-d)) * pi/180 for angle in angleRange]
+    length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
+    points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
+    assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
+    points = flattenTo2dPoint(points)
+    return points
+
+def generateElevationDistribution(row, transform, index, elevation):
+    points = row.landscape_points
+    elevations = generateLandscapeElevationPoints(points, transform, index, elevation)
+    return elevations
 def findLandscapeElevationPickled(point: tuple[float], stationsPoints) -> float:
     x, y = point
     r, c = calcIndex(x, y)
@@ -87,6 +101,24 @@ def findLandscapeElevation(point: tuple[float], transform, index, elevation):#ti
     z = bridgeElevation(point, point_coordinates, point_values)
 
     return z if z > -1e20 else 0.0
+
+def generateLandscapeElevation(point, transform, index, elevation):
+    height, width = elevation.shape
+    px, py = index(*point)
+    
+    point_indexes = [(py, px), (py, px+1), (py, px-1), (py+1, px), (py-1, px), (py+1, px-1), (py-1, px+1), (py-1, px-1), (py+1, px+1)]
+    point_indexes = [p for p in point_indexes if p[0] >= 0 and p[1] >= 0]
+    point_indexes = [p for p in point_indexes if p[0] < height and p[1] < width]
+
+    point_coordinates = [transform * p for p in point_indexes]
+    point_values = [elevation[p] for p in point_indexes]
+    
+    if len(point_coordinates) < 2:
+        return 0
+
+    z = bridgeElevation(point, point_coordinates, point_values)
+
+    return z if z > -1e20 else 0.0
         
 def findLandscapeElevationPoints(points: list[tuple[float]], transform, index, elevation) -> list[float]:
     """
@@ -96,9 +128,13 @@ def findLandscapeElevationPoints(points: list[tuple[float]], transform, index, e
     Returns:
         a list of floats representing the elevavtion of points in a distribution
     """
-    flatPoints = flattenTo2dPoint(points)    
+    flatPoints = flattenTo2dPoint(points)  
     res = [findLandscapeElevation(point, transform, index, elevation) for point in flatPoints] #Pickled/Not Pickled
 
+    return res
+
+def generateLandscapeElevationPoints(points, transform, index, elevation):
+    res = [generateLandscapeElevation(point, transform, index, elevation) for point in points]
     return res
         
 def findLandscapeCoordinates(transform, r, c) -> tuple[list[float]]:

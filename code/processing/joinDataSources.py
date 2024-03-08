@@ -1,21 +1,14 @@
 import pandas as pd
 from utils.calculateConstants import *
-import json
 
-with open("D:/SKóli/lokaverkefni_vel/data/carra24klst-25-2-24-test3months.json", 'r') as f:
-    jsn = json.load(f)
-X,Y = [], []
-for timestamp in jsn['timestamp_location']:
-    X.append(jsn['timestamp_location'][timestamp][0][0])
-    Y.append(jsn['timestamp_location'][timestamp][0][1])
 
-#df1 = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/Stripped_25ms_24klst_10min.feather')
+df1 = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/Stripped_25ms_24klst_10min.feather')
 
-#df2 = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/interpolatedCarra-full-25ms-24hr.feather')
+df2 = pd.read_feather('E:Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/interpolatedCarra-full-25ms-24hr-28-2-24.feather')
     
-df1 = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather')
+#df1 = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather')
 
-df2 = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/interpolatedCarra-test-1month-26-2-24.feather')
+#df2 = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/interpolatedCarra-test-1month-26-2-24.feather')
 
 df1 = df1.rename(columns = {'timi':'time'})
 
@@ -44,7 +37,13 @@ df = pd.merge(df2, df1, on = ['time', 'X', 'Y'], how = 'inner')
 
 df = df.filter(regex = '^(?!.*_150$)', axis = 1)
 
+check = (df.t_15 == df.t_250) | (df.t_250 == df.t_500) | (df.ws_15 == df.ws_250) | (df.ws_250 == df.ws_500)
+
+df = df[~check]
+
 df[['Ri_01', 'Ri_12']] = df.apply(rowRichardson, axis = 1).apply(pd.Series)
 df[['N_01', 'N_12']] = df.apply(rowBruntVaisala, axis = 1).apply(pd.Series)
 
-df.to_feather('D:/Skóli/lokaverkefni_vel/data/merged-test1month-26-2-24.feather')
+df.to_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather")
+
+print(df)

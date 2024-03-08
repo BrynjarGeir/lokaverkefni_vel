@@ -1,22 +1,40 @@
-import torch.nn as nn, torch.optim as optim
-import torch
-from torch import tensor
+import torch.nn as nn, torch.optim as optim, torch
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-import pandas as pd, numpy as np
+import pandas as pd, numpy as np, tensorflow as tf
 import copy
 import tqdm
 from sklearn.metrics import r2_score
 
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+def mean_absolute_percentage_error(y_true, y_pred):
+    return torch.mean(torch.abs((y_true-y_pred) / y_true)) * 100.0
 
-X, y = df.drop(['_merge', 'f', 'fg', 'stod', 'gust_factor'], axis = 1), df['gust_factor']
+df = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather')
+df = df[df.f < df.fg]
+df['gust_factor'] = df.fg / df.f
+df = df.dropna()
+df = df.drop(['f', 'fg', 'fsdev', 'd', 'dsdev', 'longitude', 'latitude', 'X', 'Y', 'time', 'stod'], axis = 1)# + [f'Landscape_{i}' for i in range(70)], axis = 1)
 
-X, y = X.to_numpy(), y.to_numpy()
+y = df.gust_factor
+X = df.drop(['gust_factor'], axis = 1)
+
+# Changing the type of X,y so as to work with Tensorflow
+X, y = X.values.astype(np.float32), y.values.astype(np.float32)
+
+scaler = StandardScaler()
+
+# Assuming 'X' is your feature matrix and 'y' is your target variable
+# Replace 'X' and 'y' with your actual data
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.fit_transform(X_test)
 
 test_size = 0.2
 seed = 42
-
 input_size = X.shape[1]
 
 model = nn.Sequential(
@@ -29,7 +47,7 @@ model = nn.Sequential(
     nn.Linear(6, 1)
 )
 
-loss_fn = nn.MSELoss()
+loss_fn = mean_absolute_percentage_error#nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr = 1e-4)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
@@ -44,7 +62,7 @@ batch_size = 10  # size of each batch
 batch_start = torch.arange(0, len(X_train), batch_size)
  
 # Hold the best model
-best_mse = np.inf   # init to infinity
+best_mape = np.inf   # init to infinity
 best_weights = None
 history = []
  
@@ -70,11 +88,11 @@ for epoch in range(n_epochs):
     # evaluate accuracy at end of each epoch
     model.eval()
     y_pred = model(X_test)
-    mse = loss_fn(y_pred, y_test)
-    mse = float(mse)
-    history.append(mse)
-    if mse < best_mse:
-        best_mse = mse
+    mape = loss_fn(y_pred, y_test)
+    mape = float(mape)
+    history.append(mape)
+    if mape < best_mape:
+        best_mape = mape
         best_weights = copy.deepcopy(model.state_dict())
  
 # restore model and return best accuracy
@@ -85,8 +103,8 @@ y_pred = model(X_test)
 y_test, y_pred = y_test.detach().numpy(), y_pred.detach().numpy()
 r2 = r2_score(y_test, y_pred)
 
-print("MSE: %.2f" % best_mse)
-print("RMSE: %.2f" % np.sqrt(best_mse))
-print(f"The r2 score is {r2}")
+print("MAPE: %.2f" % best_mape, " %")
+#print("RMSE: %.2f" % np.sqrt(best_mse))
+#print(f"The r2 score is {r2}")
 plt.plot(history)
 plt.show()

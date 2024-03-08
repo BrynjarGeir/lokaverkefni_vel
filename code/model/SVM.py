@@ -7,12 +7,14 @@ import tensorflow as tf, pandas as pd, numpy as np
 def mean_absolute_percentage_error(y_true, y_pred):
     return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0
 
-#df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/merged-test1month-26-2-24.feather')
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+df = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather')
 df = df[df.f < df.fg]
+df['gust_factor'] = df.fg / df.f
+df = df.dropna()
+df = df.drop(['f', 'fg', 'fsdev', 'd', 'dsdev', 'longitude', 'latitude', 'X', 'Y', 'time', 'stod'], axis = 1)# + [f'Landscape_{i}' for i in range(70)], axis = 1)
 
-y = df['fg']/df['f']
-X = df.drop(['_merge', 'gust_factor', 'f', 'fg', 'd', 'stod'] + [f'Landscape_{i}' for i in range(70)], axis = 1)
+y = df.gust_factor
+X = df.drop(['gust_factor'], axis = 1)
 
 # Changing the type of X,y so as to work with Tensorflow
 X, y = X.values.astype(np.float32), y.values.astype(np.float32)

@@ -8,11 +8,11 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return tf.reduce_mean(tf.abs((y_true-y_pred) / y_true)) * 100.0
 
 #df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/merged-test1month-26-2-24.feather')
-df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/combined-4-1-24.feather')
+df = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather')
 df = df[df.f < df.fg]
 
 y = df['fg']/df['f']
-X = df.drop(['_merge', 'gust_factor', 'f', 'fg', 'd', 'stod'] + [f'Landscape_{i}' for i in range(70)], axis = 1)
+X = df.drop(['f', 'fg', 'fsdev', 'd', 'dsdev', 'longitude', 'latitude', 'X', 'Y', 'time', 'stod'], axis = 1)# + [f'Landscape_{i}' for i in range(70)], axis = 1)
 
 # Changing the type of X,y so as to work with Tensorflow
 X, y = X.values.astype(np.float32), y.values.astype(np.float32)
@@ -31,17 +31,17 @@ X_test = scaler.fit_transform(X_test)
 model = XGBRegressor(eval_metric = mean_absolute_percentage_error)
 
 param_grid = {
-    'learning_rate': [0.01, 0.1, 0.2],
-    'max_depth': [3, 4, 5],
-    'n_estimators': [50, 100, 200],
-    'subsample': [0.8, 0.9, 1.0],
-    'colsample_bytree': [0.8, 0.9, 1.0]
+    'learning_rate': [0.1, 0.001],
+    'max_depth': [3, 5],
+    'n_estimators': [50, 100],
+    'subsample': [0.8, 1.0],
+    'colsample_bytree': [0.8, 1.0]
 }
 
 gridSearch = GridSearchCV(
     estimator=model,
     param_grid=param_grid,
-    scoring = 'neg_mean_squared_error',
+    scoring = mean_absolute_percentage_error,
     cv = 5,
     n_jobs = -1
 )
