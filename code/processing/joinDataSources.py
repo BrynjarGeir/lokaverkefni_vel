@@ -1,5 +1,6 @@
-import pandas as pd
+import pandas as pd, rasterio
 from utils.calculateConstants import *
+from utils.elevation import findLandscapeElevation
 
 
 df1 = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/Stripped_25ms_24klst_10min.feather')
@@ -44,6 +45,15 @@ df = df[~check]
 df[['Ri_01', 'Ri_12']] = df.apply(rowRichardson, axis = 1).apply(pd.Series)
 df[['N_01', 'N_12']] = df.apply(rowBruntVaisala, axis = 1).apply(pd.Series)
 
-df.to_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-25ms-24hr-28-2-24.feather")
+with rasterio.open('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/IslandsDEMv1.0_20x20m_isn93_zmasl.tif') as dataset:
+    elevation = dataset.read(1)
+    transform = dataset.transform
+    index = dataset.index
 
-print(df)
+def addPointElevation(row, transform, index, elevation):
+    X, Y = row.X, row.Y
+    return findLandscapeElevation((X,Y), transform, index, elevation)
+
+df['station_elevation'] = df.apply(addPointElevation, args = (transform, index, elevation), axis = 1)
+
+df.to_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-W-Landscape-And-Station-Elevations-25ms-24hr-11-3-24.feather")
