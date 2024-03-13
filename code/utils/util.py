@@ -3,7 +3,7 @@ from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from utils.transform import readIndexBool
 from utils.read import getCarraIndicesToKeep
 from get_data.getCarraBasedOnVedur import callCarra
-from processing.filterAndShiftCarra import filterAndShiftFile
+from process_data.filterAndShiftCarra import filterAndShiftFile
 from math import sqrt, dist
 import pandas as pd
 from tqdm import tqdm
