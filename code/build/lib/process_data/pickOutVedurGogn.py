@@ -101,4 +101,4 @@ def iterativeFilteredDF(vedurDF, threshold):
     return filteredDF
 
 
-stripData('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/10min', 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_10min_24klst.feather')
+stripData('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/klst', 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather')
