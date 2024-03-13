@@ -50,7 +50,7 @@ def stripData(directory: str, outputPath: str, limit: float = 20, band: int = 2)
                     for a in res[1:]
                 ]
                 res = [a for a in res if a[band] >= limit]
-                if len(res) == 0:
+                if len(res) == 0 or res[0][1] not in stationsLonLatXY:
                     continue
                 if not lon:
                     lon, lat, x, y = stationsLonLatXY[res[0][1]]
@@ -75,7 +75,7 @@ def tooClose(dt1, dt2, threshold):
 
 # Take the stripped by a limit dataframe and limit the information from it so that for a given weatherstation we won't have the same
 # weather twice or more, that is I won't have any two observations that are within threshold seconds of each other
-def stripToDifferentWeathers(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather', threshold: int = 60*60*24):
+def stripToDifferentWeathers(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_10min_24klst.feather', threshold: int = 60*60*24):
     vedurDF = pd.read_feather(vedurPath)
     vedurDF.timi = pd.to_datetime(vedurDF.timi)
     vedurDF = vedurDF.sort_values(by=['stod', 'timi', 'f'])
@@ -101,4 +101,34 @@ def iterativeFilteredDF(vedurDF, threshold):
     return filteredDF
 
 
+<<<<<<< HEAD
 stripData('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/klst', 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather')
+=======
+
+#stripData('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/10min', 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_10min_24klst.feather')
+
+#stripToDifferentWeathers()
+
+df = pd.read_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_24klst_10min.feather')
+
+df = df.sort_values(by=['stod', 'timi'])
+
+# Define threshold for time difference (24 hours)
+threshold = pd.Timedelta('1 day')
+
+# Function to filter rows within each group of 'stod'
+def filter_within_threshold(group):
+    keep_indices = [0]  # Keep the first row of each group by default
+    for i in range(1, len(group)):
+        if group['timi'].iloc[i] - group['timi'].iloc[i-1] > threshold:
+            keep_indices.append(i)
+        elif group['f'].iloc[i] > group['f'].iloc[i-1]:
+            keep_indices[-1] = i
+    return group.iloc[keep_indices]
+
+# Apply filtering function to each group of 'stod'
+filtered_df = df.groupby('stod').apply(filter_within_threshold).reset_index(drop=True)
+
+filtered_df.to_feather('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_24klst_10min-dropped_too_close.feather')
+
+>>>>>>> 5256bc2d19e207c7651031a1ca855cf57dfc8289

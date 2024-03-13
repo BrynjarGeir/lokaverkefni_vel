@@ -22,7 +22,7 @@ def generateJSON(coordinates: list, datetime: str) -> str:
     }
     return res
 
-def generateListOfDatetimesCoordinates(vedurPath: str = "D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_24klst_10min.feather") -> list:
+def generateListOfDatetimesCoordinates(vedurPath: str = "D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_24klst_10min-dropped_too_close.feather") -> list:
     vedurDF = pd.read_feather(vedurPath)
     vedurDF = vedurDF.dropna(subset = ['timi', 'f', 'fg', 'stod', 'd', 'X', 'Y'])
     #vedurDF['pointsYX'] = vedurDF.apply(lambda row: findLandscapeDistribution((row.X, row.Y), row.d, n = 10, k = 1, angleRange=[0]), axis = 1) # k = 5?6
@@ -30,13 +30,15 @@ def generateListOfDatetimesCoordinates(vedurPath: str = "D:/Skóli/lokaverkefni_
     #vedurDF.pointsYX = vedurDF.pointsXY.apply(lambda points: [p[0] for p in points])
 
     grouped_df = vedurDF.groupby('timi').agg({'pointsYX': list}).reset_index()
+
+    grouped_df.timi = pd.to_datetime(grouped_df.timi)
     
     #grouped_df['flattened'] = grouped_df.pointsYX.apply(lambda x: [arr for sublist in x for arr in sublist])
 
-    start_date = (min(grouped_df.timi) + timedelta(days=365)).replace(day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
-    start_date = start_date.replace(year = 2019, month = 1, day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
-    end_date = start_date.replace(year = 2019, month = 1, day = 31, hour = 23, minute = 59, second = 59, microsecond = 59)
-    grouped_df = grouped_df[(grouped_df.timi >= start_date) & (grouped_df.timi <= end_date)]
+    #start_date = (min(grouped_df.timi) + timedelta(days=365)).replace(day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
+    #start_date = start_date.replace(year = 2019, month = 1, day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
+    #end_date = start_date.replace(year = 2019, month = 1, day = 31, hour = 23, minute = 59, second = 59, microsecond = 59)
+    #grouped_df = grouped_df[(grouped_df.timi >= start_date) & (grouped_df.timi <= end_date)]
 
     grouped_df.timi = grouped_df.timi.dt.strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -55,7 +57,7 @@ def generateAllJSON():
                             "feather_file": "interpolatedCarra.feather"},
                 "timestamp_location": coords_dict}
 
-    with open('D:/Skóli/lokaverkefni_vel/data/carra24klst-26-2-24-test1month.json', 'w') as f:
+    with open('D:/Skóli/lokaverkefni_vel/data/carra24klst-20ms-13-3-24-dropped-too-close.json', 'w') as f:
         json.dump(res, f, indent = 4)
 
 def convertPKLToJSON():
