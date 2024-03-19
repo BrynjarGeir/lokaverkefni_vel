@@ -42,8 +42,8 @@ check = (df.t_15 == df.t_250) | (df.t_250 == df.t_500) | (df.ws_15 == df.ws_250)
 
 df = df[~check]
 
-df[['Ri_01', 'Ri_12']] = df.apply(rowRichardson, axis = 1).apply(pd.Series)
-df[['N_01', 'N_12']] = df.apply(rowBruntVaisala, axis = 1).apply(pd.Series)
+df[['Ri_01', 'Ri_12', 'Ri_02']] = df.apply(rowRichardson, axis = 1).apply(pd.Series)
+df[['N_01', 'N_12', 'N_02']] = df.apply(rowBruntVaisala, axis = 1).apply(pd.Series)
 
 with rasterio.open('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/IslandsDEMv1.0_20x20m_isn93_zmasl.tif') as dataset:
     elevation = dataset.read(1)
@@ -56,4 +56,4 @@ def addPointElevation(row, transform, index, elevation):
 
 df['station_elevation'] = df.apply(addPointElevation, args = (transform, index, elevation), axis = 1)
 
-df.to_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-W-Landscape-And-Station-Elevations-25ms-24hr-11-3-24.feather")
+df.to_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-W-Landscape-And-Station-Elevations-25ms-24hr-18-3-24.feather")

@@ -37,9 +37,29 @@ def findLandscapeDistribution(point: tuple[float], d: float = 45, n: int = 20, k
     points = np.array([[(x + l*cos(angle), y + l*sin(angle)) for angle in angles] for l in length_rng])
     assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {point}"
     return points
-# Returns the landscape elevation using the the stationsPoints dictionary (from the pickled files)
-def generateLandscapeDistrbution(row, d: float = 45, n: int = 20, k: int = 10,
+
+def generateLandscapeDistriebution(row, d: float = 45, n: int = 20, k: int = 10,
                                angleRange: list[float] = [-15, -10, -5, 0, 5, 10, 15]) -> np.array:
+    X, Y, d = row.X, row.Y, row.d
+    angles = [(angle + (90-d)) * pi/180 for angle in angleRange]
+    length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
+    points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
+    assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
+    points = flattenTo2dPoint(points)
+    return points
+
+def generateLandscapeDistribution2Sectors(row, d: float = 45, n: int = 20, k: int = 10,
+                               angleRange: list[float] = [-15, -10, -5, 0, 5, 10, 15] + [-15+180, -10+180, -5+180, 0+180, 5+180, 10+180, 15+180]) -> np.array:
+    X, Y, d = row.X, row.Y, row.d
+    angles = [(angle + (90-d)) * pi/180 for angle in angleRange]
+    length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
+    points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
+    assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
+    points = flattenTo2dPoint(points)
+    return points
+
+def generateLandscapeDistributionCircle(row, d: float = 45, n: int = 20, k: int = 10,
+                               angleRange: list[float] = [a for a in range(-175, 185, 5)]) -> np.array:
     X, Y, d = row.X, row.Y, row.d
     angles = [(angle + (90-d)) * pi/180 for angle in angleRange]
     length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]

@@ -13,16 +13,20 @@ def rowRichardson(row):
     theta_2 = calculatePotentialTemperature(row.t_500, 1000, row.p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
+    dT02 = theta_2 - theta_0
     Tave01 = (theta_0 + theta_1) / 2
     Tave12 = (theta_1 + theta_2) / 2
-    dz01, dz12 = 250 - 15, 500 - 250
+    Tave02 = (theta_0 + theta_2) / 2
+    dz01, dz12, dz02 = 250 - 15, 500 - 250, 500-15
     dU01 = row.ws_250 - row.ws_15
     dU12 = row.ws_500 - row.ws_250
+    dU02 = row.ws_500 - row.ws_15
     g = 9.82
 
     Ri_01 = (g * dT01 * dz01) / (Tave01 * dU01**2)
     Ri_12 = (g * dT12 * dz12) / (Tave12 * dU12**2)
-    return Ri_01, Ri_12
+    Ri_02 = (g * dT02 * dz02) / (Tave02 * dU02**2)
+    return Ri_01, Ri_12, Ri_02
 
 def rowBruntVaisala(row):
     theta_0 = calculatePotentialTemperature(row.t_15, 1000, row.p_15)
@@ -30,13 +34,16 @@ def rowBruntVaisala(row):
     theta_2 = calculatePotentialTemperature(row.t_500, 1000, row.p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
+    dT02 = theta_2 - theta_1
     Tave01 = (theta_0 + theta_1) / 2
     Tave12 = (theta_1 + theta_2) / 2
-    dz01, dz12 = 250 - 15, 500 - 250
+    Tave02 = (theta_0 + theta_2) / 2
+    dz01, dz12, dz02 = 250 - 15, 500 - 250, 500 - 15
     g = 9.82
 
-    N_01 = ((g * dT01) / (Tave01 * dz01))
-    N_02 = ((g * dT12) / (Tave12 * dz12))
+    N_01 = ((g * dT01) / (Tave01 * dz01))**0.5
+    N_12 = ((g * dT12) / (Tave12 * dz12))**0.5
+    N_02 = ((g * dT02) / (Tave02 * dz02))**0.5
 
-    return N_01, N_02
+    return N_01, N_12, N_02
     
