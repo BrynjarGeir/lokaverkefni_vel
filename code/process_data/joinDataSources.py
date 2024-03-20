@@ -2,6 +2,12 @@ import pandas as pd, rasterio
 from utils.calculateConstants import *
 from utils.elevation import findLandscapeElevation
 
+df = pd.read_feather("E:/Skóli/HÍ/Vélaverkfræði Master Hí/Lokaverkefni/Data/merged-full-W-Landscape-And-Station-Elevations-25ms-24hr-18-3-24.feather")
+
+print(df)
+
+exit()
+
 
 df1 = pd.read_feather('E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/Data/Stripped_25ms_24klst_10min.feather')
 
