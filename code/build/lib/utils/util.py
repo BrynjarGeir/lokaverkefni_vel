@@ -35,53 +35,6 @@ def isFilePresentFilePath(filePath: str) -> bool:
 def allPresentFeatherFiles(directory: str = 'D:/Skóli/lokaverkefni_vel/data/Carra/Feather/') -> set[str]:
     return set([file for file in os.listdir('D:/Skóli/lokaverkefni_vel/data/Carra/Feather/') if file.endswith('.feather')])
 
-# Find the relevant Carra files given a datetime string from vedur data, downloads and filtershifts if not available
-def findRelevantCarraFiles(vedurDateTime: str) -> list[str]:
-    prev, aft = createCarraNameBasedOnVedurTime(vedurDateTime)
-    directory = "D:/Skóli/lokaverkefni_vel/data/Carra/Feather/"
-    outputPath = "E:/CopiedCarraGRIB" #"D:/Skóli/lokaverkefni_vel/data/Carra/GRIB/"
-
-    prevBool, aftBool = isFilePresent(directory, prev), isFilePresent(directory, aft)
-
-    if not prevBool or not aftBool:
-        return None, None
-
-    return directory + prev, directory + aft
-  
-    if not prevBool:
-        try:
-            year, month, day, time = prev.split('-')
-            time = time[:2] + ":00:00"
-            file = os.path.split(prev)[1]
-            file = os.path.splitext(file)[0] + ".grib"
-            outputFilePath = os.path.join(outputPath, file)
-            print(f"file: {file}, year: {year}, month: {month}, day: {day}, time: {time}, outputFilePath: {outputFilePath}")
-            callCarra(day, month, year, time, outputFilePath)
-            print(f"Successfully downloaded prev for {prev}. The output file path is at {outputFilePath}")
-            #to_keep = getCarraIndicesToKeep()
-            filterAndShiftFile(file, directory, outputPath)#, to_keep)
-
-        except Exception as e:
-            print(f"Not able to download prev at {prev}!")
-            print(f"The cause being: {e}")
-
-    if not aftBool:
-        try:
-            year, month, day, time = aft.split('-')
-            time = time[:2] + ":00:00"
-            file = os.path.split(aft)[1]
-            file = os.path.splitext(file)[0] + ".grib"     
-            outputFilePath = os.path.join(outputPath, file)
-            callCarra(day, month, year, time, outputFilePath)
-            print(f"Successfully downloaded aft for {aft}. The output file path is at {outputFilePath}")
-            #to_keep = getCarraIndicesToKeep()
-            filterAndShiftFile(file, directory, outputPath)#, to_keep)
-        except Exception as e:
-            print(f"Not able to download aft at {aft}!")
-            print(f"The cause being: {e}")
-
-    return directory + prev, directory + aft
-
 # Return Euclidean distance between two points
 def distance(a, b):
     return sqrt((a[0]-b[0])**2 + (a[1] - b[1])**2)

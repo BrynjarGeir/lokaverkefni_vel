@@ -8,9 +8,9 @@ def calculatePotentialTemperature(T, P0, P, Rcp = 0.286):
     return T * (P0 / P) ** Rcp
 
 def rowRichardson(row):
-    theta_0 = calculatePotentialTemperature(row.t_15, 1000, row.p_15)
-    theta_1 = calculatePotentialTemperature(row.t_250, 1000, row.p_250)
-    theta_2 = calculatePotentialTemperature(row.t_500, 1000, row.p_500)
+    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
+    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
+    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
     dT02 = theta_2 - theta_0
@@ -29,12 +29,12 @@ def rowRichardson(row):
     return Ri_01, Ri_12, Ri_02
 
 def rowBruntVaisala(row):
-    theta_0 = calculatePotentialTemperature(row.t_15, 1000, row.p_15)
-    theta_1 = calculatePotentialTemperature(row.t_250, 1000, row.p_250)
-    theta_2 = calculatePotentialTemperature(row.t_500, 1000, row.p_500)
+    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
+    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
+    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
-    dT02 = theta_2 - theta_1
+    dT02 = theta_2 - theta_0
     Tave01 = (theta_0 + theta_1) / 2
     Tave12 = (theta_1 + theta_2) / 2
     Tave02 = (theta_0 + theta_2) / 2
