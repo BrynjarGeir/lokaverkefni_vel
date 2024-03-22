@@ -5,7 +5,7 @@ from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from tqdm import tqdm
 from datetime import datetime
 from affine import Affine
-import rasterio, dill as pickle, os, pandas as pd, numpy as np
+import rasterio, dill as pickle, os, pandas as pd, numpy as np, csv
 
 def bridgeForHeightLevel(bounding_points_prev: list, bounding_points_aft: list, prev_df: pd.DataFrame, aft_df: pd.DataFrame, X: float, Y: float, 
                          features_to_bridge: list, vedurDateTime: str, height_level: float) -> list[float]:
@@ -212,4 +212,22 @@ def resetFeatherFileIndex(feather_directory: str = "D:/Skóli/lokaverkefni_vel/d
             df = df.reset_index()
             df.to_feather(feather_directory + file)
 
-#combineAllVedurCarraLandscape("D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_25ms_10min.feather", "D:/Skóli/lokaverkefni_vel/data/combined-31-1-24.feather")
+def combineKLST(directory: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/', outputpath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/combined_klst.feather'):
+    files = []
+    for folder in ['klst/', 'vg/']:
+        files.extend([directory + folder + file for file in os.listdir(directory + folder)])
+
+    columns = ['timi','stod','f','fx','fg','d']
+    data = []
+    for file in tqdm(files, total = len(files)):
+        with open(file, 'r') as f:
+            lines = [line for line in csv.reader(f)]
+        if 'dsdev' in lines[0]:
+            lines = [line[:-1] for line in lines]
+        lines = lines[1:]
+        data.extend(lines)
+
+    df = pd.DataFrame(data, columns = columns)
+    df.to_feather(outputpath)
+
+combineKLST()
