@@ -1,13 +1,10 @@
 import os
 from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from utils.transform import readIndexBool
-from utils.read import getCarraIndicesToKeep
-from get_data.getCarraBasedOnVedur import callCarra
 from process_data.filterAndShiftCarra import filterAndShiftFile
 from math import sqrt, dist
 import pandas as pd
 from tqdm import tqdm
-from get_data.getCarraBasedOnVedur import callCarra
 
 # In case I change the folder structure I can just automatically find the folder anywhere in lokaverkefni_vel
 def findFile(file_name: str, directory: str= "D:/Skóli/lokaverkefni_vel/") -> str:

@@ -2,7 +2,6 @@ import numpy as np
 from math import exp, log, cos, sin, pi
 from utils.bridging import bridgeElevation
 from utils.util import flattenTo2dPoint
-from utils.getPickledObjects import calcIndex, calcTransform
 
 def generateLandscapeDistribution(row, d: float = 45, n: int = 20, k: int = 10,
                                angleRange: list[float] = [-15, -10, -5, 0, 5, 10, 15]) -> np.array:
@@ -101,3 +100,7 @@ def generateElevationDistribution(row, transform, index, elevation):
     points = row.landscape_points
     elevations = generateLandscapeElevationPoints(points, transform, index, elevation)
     return elevations
+
+def addPointElevation(row, transform, index, elevation):
+    X, Y = row.X, row.Y
+    return findLandscapeElevation((X, Y), transform, index, elevation)

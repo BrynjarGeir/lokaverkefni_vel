@@ -1,3 +1,5 @@
+import numpy as np
+
 def calculateRichardsonNumber(dT, Tave, dz, dU, g = 9.82):
     return (g * dT * dz) / (Tave * dU**2)
 
@@ -23,9 +25,27 @@ def rowRichardson(row):
     dU02 = row.ws_500 - row.ws_15
     g = 9.82
 
-    Ri_01 = (g * dT01 * dz01) / (Tave01 * dU01**2)
-    Ri_12 = (g * dT12 * dz12) / (Tave12 * dU12**2)
-    Ri_02 = (g * dT02 * dz02) / (Tave02 * dU02**2)
+    try:
+        Ri_01 = (g * dT01 * dz01) / (Tave01 * dU01**2)
+    except ZeroDivisionError:
+        Ri_01 = np.inf
+    except Exception as e:
+        Ri_01 = np.nan
+    
+    try:
+        Ri_12 = (g * dT12 * dz12) / (Tave12 * dU12**2)
+    except ZeroDivisionError:
+        Ri_12 = np.inf
+    except Exception as e:
+        Ri_12 = np.nan
+
+    try:
+        Ri_02 = (g * dT02 * dz02) / (Tave02 * dU02**2)
+    except ZeroDivisionError:
+        Ri_02 = np.inf
+    except Exception as e:
+        Ri_01 = np.nan
+
     return Ri_01, Ri_12, Ri_02
 
 def rowBruntVaisala(row):
@@ -41,9 +61,26 @@ def rowBruntVaisala(row):
     dz01, dz12, dz02 = 250 - 15, 500 - 250, 500 - 15
     g = 9.82
 
-    N_01 = ((g * dT01) / (Tave01 * dz01))**0.5
-    N_12 = ((g * dT12) / (Tave12 * dz12))**0.5
-    N_02 = ((g * dT02) / (Tave02 * dz02))**0.5
+    try:
+        N_01 = ((g * dT01) / (Tave01 * dz01))**0.5
+    except ZeroDivisionError:
+        N_01 = np.inf
+    except Exception as e:
+        N_01 = np.nan
+
+    try:
+        N_12 = ((g * dT12) / (Tave12 * dz12))**0.5
+    except ZeroDivisionError:
+        N_12 = np.inf
+    except Exception as e:
+        N_12 = np.nan
+    
+    try:
+        N_02 = ((g * dT02) / (Tave02 * dz02))**0.5
+    except ZeroDivisionError:
+        N_02 = np.inf
+    except Exception as e:
+        N_02 = np.nan
 
     return N_01, N_12, N_02
     
