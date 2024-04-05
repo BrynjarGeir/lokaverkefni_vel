@@ -7,6 +7,8 @@ get_data/__init__.py
 get_data/generateJSONForCarra.py
 model/__init__.py
 process_data/__init__.py
+process_data/filterMeasurements.py
+process_data/joinDataSources.py
 process_data/order_data/ListFiles.py
 process_data/order_data/__init__.py
 read_data/__init__.py

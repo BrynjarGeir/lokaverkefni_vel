@@ -9,15 +9,30 @@ from time import time
 
 
 def get_data_path():
-    folder_path = 'E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/' if not is_laptop() else None
-    file_path = folder_path + 'Data/NailStripped_W_Elevation/' + max(os.listdir(folder_path + 'Data/NailStripped_W_Elevation/'),
-                key = lambda f: os.path.getmtime(folder_path + 'Data/NailStripped_W_Elevation/' + f))
+    folder_path = 'D:/Skoli/Mastersverkefni/lokaverkefni_vel/data/' if is_laptop() else 'E:/Skóli/HÍ/Vélaverkfræði Master HÍ/Lokaverkefni/data/'
+    file_path = folder_path + 'NailStripped_W_Elevation/' + max(os.listdir(folder_path + 'NailStripped_W_Elevation/'),
+                key = lambda f: os.path.getmtime(folder_path + 'NailStripped_W_Elevation/' + f))
     return file_path
-    
+
+# Get data for plotting and such
+def get_data():
+    df = pd.read_feather(get_data_path())
+    df = df.reset_index()
+    df['relativeCorner'] = df.apply(cornerFromCenterLand, axis = 1)
+    df = df[df.f < df.fg]
+    df['gust_factor'] = df.fg / df.f
+    df_unfolded = df.elevations.apply(pd.Series)
+    df = pd.concat([df, df_unfolded], axis = 1)
+    df = df.drop(['index'], axis = 1)
+
+    return df
+
+# Get data for training and such    
 def get_normalized_data(n_components: int = 10):
     scaler = StandardScaler()
     df = pd.read_feather(get_data_path())
     df = df.reset_index()
+    df = df.drop(['index'], axis = 1)
 
     df['relativeCorner'] = df.apply(cornerFromCenterLand, axis = 1)
     df[['N_01_real', 'N_01_imag']] = df['N_01'].apply(pd.Series)
