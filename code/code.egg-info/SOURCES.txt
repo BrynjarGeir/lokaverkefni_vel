@@ -16,6 +16,7 @@ utils/calculateConstants.py
 utils/data.py
 utils/elevation.py
 utils/interpolate.py
+utils/model.py
 utils/timeManipulation.py
 utils/transform.py
 utils/util.py
