@@ -1,6 +1,6 @@
 import numpy as np
 from math import exp, log, cos, sin, pi
-from utils.bridging import bridgeElevation
+from utils.interpolate import bridgeElevation
 from utils.util import flattenTo2dPoint
 
 def generateLandscapeDistribution(row, d: float = 45, n: int = 20, k: int = 10,

@@ -1,9 +1,11 @@
-import pandas as pd, dill as pickle, json, numpy as np
+import pandas as pd, dill as pickle, json
 from tqdm import tqdm
-from utils.elevation import findLandscapeDistribution
 from utils.transform import transformISN93ToWGS84
-from datetime import datetime, timedelta
 from time import time
+
+with open('D:/Skóli/lokaverkefni_vel/data/Vedurstofa/stationsLonLatXY.pkl', 'rb') as f:
+    stationsLonLatXY = pickle.load(f)
+
 def getDTXYD(row):
     return row.timi, row.X, row.Y, row.d
 
@@ -22,8 +24,14 @@ def generateJSON(coordinates: list, datetime: str) -> str:
     }
     return res
 
-def generateListOfDatetimesCoordinates(vedurPath: str = "D:/Skóli/lokaverkefni_vel/data/Vedurstofa/Stripped_20ms_24klst_10min-dropped_too_close.feather") -> list:
+def getXY(stod):
+    return stationsLonLatXY[stod][2:]
+
+def generateListOfDatetimesCoordinates(vedurPath: str = 'D:/Skóli/lokaverkefni_vel/data/Vedurstofa/combined_10min_20ms_25_3_24_24hr.feather') -> list:
     vedurDF = pd.read_feather(vedurPath)
+
+    vedurDF['X'], vedurDF['Y'] = zip(*vedurDF['stod'].map(getXY))
+
     vedurDF = vedurDF.dropna(subset = ['timi', 'f', 'fg', 'stod', 'd', 'X', 'Y'])
     vedurDF['pointsYX'] = list(zip(vedurDF.Y, vedurDF.X))
 
@@ -46,7 +54,7 @@ def generateAllJSON():
                             "feather_file": "interpolatedCarra.feather"},
                 "timestamp_location": coords_dict}
 
-    with open('D:/Skóli/lokaverkefni_vel/data/carra24klst-20ms-13-3-24-dropped-too-close.json', 'w') as f:
+    with open('D:/Skóli/lokaverkefni_vel/data/carra24klst-20ms-25-3-24.json', 'w') as f:
         json.dump(res, f, indent = 4)
 
 def convertPKLToJSON():

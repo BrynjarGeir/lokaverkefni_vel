@@ -1,9 +1,8 @@
-import os
 from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from utils.transform import readIndexBool
 from process_data.filterAndShiftCarra import filterAndShiftFile
 from math import sqrt, dist
-import pandas as pd
+import pandas as pd, os, getpass
 from tqdm import tqdm
 
 # In case I change the folder structure I can just automatically find the folder anywhere in lokaverkefni_vel
@@ -115,3 +114,6 @@ def flattenTo2dPoint(nested_list: list):
     for sublist in nested_list:
         res.extend(sublist)
     return res
+
+def is_laptop():
+    return not 'Brynjar Geir' == getpass.getuser()

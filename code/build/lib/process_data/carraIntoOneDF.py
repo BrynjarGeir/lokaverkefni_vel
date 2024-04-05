@@ -1,6 +1,6 @@
 from utils.timeManipulation import createCarraNameBasedOnVedurTime, round_to_3_hour_intervals
 from utils.util import allPresentFeatherFiles
-from utils.bridging import findBoundingPoints
+from utils.interpolate import findBoundingPoints
 
 from get_data.getCarraBasedOnVedur import callCarra, createOutputFilePath
 from get_data.generateJSONForCarra import generateListOfDatetimesCoordinates
@@ -78,15 +78,6 @@ def singleOutCarra(featherPath: str = 'D:/Skóli/lokaverkefni_vel/data/Carra/Fea
     df = pd.DataFrame(combined, columns = ['DateTime', 'lat', 'lon', 'wdir15', 't15', 'ws15', 'pres15', 'wdir150', 't150', 'ws150', 'pres150', 'wdir250', 't250', 'ws250', 'pres250', 'wdir500', 't500', 'ws500', 'pres500'])
 
     df.to_feather('D:/Skóli/lokaverkefni_vel/data/combined-1-2-24.feather')
-
-                
-
-            
-
-
-
-
-
 
 
 singleOutCarra()

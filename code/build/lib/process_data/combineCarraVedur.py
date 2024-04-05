@@ -1,5 +1,5 @@
 from utils.util import findRelevantCarraFiles, allPresentFeatherFiles
-from utils.bridging import bridgeSpatialCarra, bridgeCarraTemporal, findBoundingPoints
+from utils.interpolate import bridgeSpatialCarra, bridgeCarraTemporal, findBoundingPoints
 from utils.elevation import findLandscapeDistribution, findLandscapeElevationPoints, findLandscapeElevation
 from utils.timeManipulation import createCarraNameBasedOnVedurTime
 from tqdm import tqdm
