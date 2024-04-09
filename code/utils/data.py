@@ -18,7 +18,7 @@ def get_data_path():
 def get_data():
     df = pd.read_feather(get_data_path())
     df = df.reset_index()
-    df['relativeCorner'] = df.apply(cornerFromCenterLand, axis = 1)
+    df['twd'] = df.apply(cornerFromCenterLand, axis = 1)
     df = df[df.f < df.fg]
     df['gust_factor'] = df.fg / df.f
     df_unfolded = df.elevations.apply(pd.Series)
@@ -34,7 +34,7 @@ def get_normalized_data(n_components: int = 10):
     df = df.reset_index()
     df = df.drop(['index'], axis = 1)
 
-    df['relativeCorner'] = df.apply(cornerFromCenterLand, axis = 1)
+    df['twd'] = df.apply(cornerFromCenterLand, axis = 1)
     df[['N_01_real', 'N_01_imag']] = df['N_01'].apply(pd.Series)
     df[['N_12_real', 'N_12_imag']] = df['N_12'].apply(pd.Series)
     df[['N_02_real', 'N_02_imag']] = df['N_02'].apply(pd.Series)
@@ -51,7 +51,7 @@ def get_normalized_data(n_components: int = 10):
     df = df.dropna()
 
     y = df.gust_factor
-    X = df[['t_15', 'ws_15', 'Ri_02', 'N_02_real', 'N_02_imag', 'station_elevation', 'relativeCorner'] + ['PC' + str(i) for i in range(n_components)]]
+    X = df[['t_15', 'ws_15', 'Ri_02', 'N_02_real', 'N_02_imag', 'station_elevation', 'twd'] + ['PC' + str(i) for i in range(n_components)]]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 0.2, random_state = 42)
@@ -76,17 +76,16 @@ def applyPCA(df: pd.DataFrame, n_components: int = 10):
     return df
 
 def cornerFromCenterLand(row):
-    X, Y, d = row.X, row.Y, row.d
+    X, Y, d0 = row.X, row.Y, 270 - row.d
     inlandX, inlandY = 520000, 485000
 
-    len_v1 = sqrt((X-inlandX)**2 + (Y-inlandY)**2)
+    c = np.arctan2(Y - inlandY, X - inlandX) * 180/ pi
 
-    v1 = ((X - inlandX)/len_v1, (Y - inlandY)/ len_v1)
+    # Wind direction relative to the direction from the center of Iceland to station
+    # Wind directly from the ocean gives twd = 180
+    twd = abs(d0 - c)
 
-    outX, outY = X + cos(d * pi / 180), Y + sin(d * pi / 180)
-
-    len_v2 = sqrt(outX**2 + outY**2)
-
-    v2 = (outX / len_v2, outY / len_v2)
-
-    return acos(np.dot(v1, v2))
+    if twd > 180:
+        twd =  360 - twd
+    
+    return cos(twd * pi / 180)
