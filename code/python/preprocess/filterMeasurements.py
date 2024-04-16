@@ -90,14 +90,14 @@ def filterMinAveWindSpeed(filteredWithInterval_path = filteredWithInterval_path,
 
 
 def combineParts(filteredWithMinAveWindSpeed_path = filteredWithMinAveWindSpeed_path):
-    df, files = None, [filteredWithMinAveWindSpeed_path + file for file in os.listdir(files) if file.endswith('.feather')]
+    df, files = pd.DataFrame(), [filteredWithMinAveWindSpeed_path + file for file in os.listdir(filteredWithMinAveWindSpeed_path) if file.endswith('.feather')]
 
     for file in tqdm(files, total = len(files), desc = "Looping over parts to combine..."):
-        if None == df:
+        if df.empty:
             df = pd.read_feather(file)
         else:
             tmp_df = pd.read_feather(file)
-            df = pd.concat(df, tmp_df)
+            df = pd.concat([df, tmp_df])
     outputpath = top_folder + f'combined_10min/Ready/combined_10min_{today}.feather'
     df.to_feather(outputpath)
 

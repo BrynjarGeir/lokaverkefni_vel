@@ -13,9 +13,9 @@ import pandas as pd, dill as pickle, json, os
 # In[ ]:
 
 
-top_folder = getTopLevelPath() + 'Measured/'
+top_folder = getTopLevelPath() + 'data/Measured/'
 folder = 'combined_10min/Ready/'
-file_path = folder + max((os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.feather')), key=os.path.getmtime, default=None) 
+file_path = max((top_folder + folder + file for file in os.listdir(top_folder + folder) if file.endswith('.feather')), key=os.path.getmtime, default=None) 
 stationsLonLatXY_path = top_folder + 'stationsLonLatXY.pkl'
 
 
@@ -61,7 +61,8 @@ def generateListOfDatetimesCoordinates(file_path = file_path, stations_LonLatXY_
     with open(stations_LonLatXY_path, 'rb') as f:
         stationsLonLatXY = pickle.load(f)
 
-    vedurDF['X'], vedurDF['Y'] = zip(*vedurDF.stod.map(getXY))
+    vedurDF['X'], vedurDF['Y'] = zip(*vedurDF['stod'].apply(lambda x: getXY(x, stationsLonLatXY)))
+    #vedurDF['X'], vedurDF['Y'] = zip(*vedurDF.stod.map(getXY, args = [stationsLonLatXY]))
     vedurDF = vedurDF.dropna(subset = ['timi', 'f', 'fg', 'stod', 'd', 'X', 'Y'])
     vedurDF['pointsYX'] = list(zip(vedurDF.Y, vedurDF.X))
     
@@ -76,7 +77,7 @@ def generateListOfDatetimesCoordinates(file_path = file_path, stations_LonLatXY_
 
 
 def generateAllJSON():
-    today = date.today.strftime("%Y-%m-%d")
+    today = date.today().strftime("%Y-%m-%d")
     output_path = top_folder + f'JSON/CARRA_{today}.json'
     grouped_df = generateListOfDatetimesCoordinates()
     grouped_df['JSON'] = grouped_df.apply(lambda row: generateJSON(row.pointsYX, row.timi), axis = 1)
