@@ -1,6 +1,2 @@
 data/
 .venv/
-.vscode/
-code/.vscode/
-code/build/
-code/code.egg-info/
