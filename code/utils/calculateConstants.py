@@ -83,4 +83,40 @@ def rowBruntVaisala(row):
         N_02 = np.nan
 
     return N_01, N_12, N_02
+
+def rowBruntVaisalaSquared(row):
+    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
+    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
+    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
+    dT01 = theta_1 - theta_0
+    dT12 = theta_2 - theta_1
+    dT02 = theta_2 - theta_0
+    Tave01 = (theta_0 + theta_1) / 2
+    Tave12 = (theta_1 + theta_2) / 2
+    Tave02 = (theta_0 + theta_2) / 2
+    dz01, dz12, dz02 = 250 - 15, 500 - 250, 500 - 15
+    g = 9.82
+
+    try:
+        N_01 = ((g * dT01) / (Tave01 * dz01))
+    except ZeroDivisionError:
+        N_01 = np.inf
+    except Exception as e:
+        N_01 = np.nan
+
+    try:
+        N_12 = ((g * dT12) / (Tave12 * dz12))
+    except ZeroDivisionError:
+        N_12 = np.inf
+    except Exception as e:
+        N_12 = np.nan
+    
+    try:
+        N_02 = ((g * dT02) / (Tave02 * dz02))
+    except ZeroDivisionError:
+        N_02 = np.inf
+    except Exception as e:
+        N_02 = np.nan
+
+    return N_01, N_12, N_02
     
