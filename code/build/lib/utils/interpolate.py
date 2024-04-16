@@ -1,6 +1,6 @@
 from utils.util import getDistances, getWeights
 
-def bridgeElevation(point: tuple[float], points: list[tuple[float]], point_values: list[tuple[float]]) -> float:
+def interpolateElevation(point: tuple[float], points: list[tuple[float]], point_values: list[tuple[float]]) -> float:
     """
     Args:
         point (tuple[float]): the point to be looked at in isn93

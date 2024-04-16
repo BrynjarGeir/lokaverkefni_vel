@@ -1,5 +1,6 @@
 data/
-files/
-latex/
-review/
-programs_zip/
+.venv/
+.vscode/
+code/.vscode/
+code/build/
+code/code.egg-info/

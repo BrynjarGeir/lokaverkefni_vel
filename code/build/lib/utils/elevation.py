@@ -1,16 +1,16 @@
 import numpy as np
 from math import exp, log, cos, sin, pi
-from utils.interpolate import bridgeElevation
-from utils.util import flattenTo2dPoint
+from utils.util import flattenList
+from utils.interpolate import interpolateElevation
 
-def generateLandscapeDistribution(row, d: float = 45, n: int = 20, k: int = 10,
+def generateLandscapeDistribution1Sector(row, d: float = 45, n: int = 20, k: int = 10,
                                angleRange: list[float] = [-15, -10, -5, 0, 5, 10, 15]) -> np.array:
     X, Y, d = row.X, row.Y, row.d
     angles = [(angle + (90-d)) * pi/180 for angle in angleRange]
     length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
     points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
     assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
-    points = flattenTo2dPoint(points)
+    points = flattenList(points)
     return points
 
 def generateLandscapeDistribution2Sectors(row, d: float = 45, n: int = 20, k: int = 10,
@@ -20,7 +20,7 @@ def generateLandscapeDistribution2Sectors(row, d: float = 45, n: int = 20, k: in
     length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
     points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
     assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
-    points = flattenTo2dPoint(points)
+    points = flattenList(points)
     return points
 
 def generateLandscapeDistributionCircle(row, d: float = 45, n: int = 20, k: int = 10,
@@ -30,7 +30,7 @@ def generateLandscapeDistributionCircle(row, d: float = 45, n: int = 20, k: int 
     length_rng = [(exp(i * log(n+1)/k) - 1) * 1000 for i in range(1, k+1)]
     points = np.array([[(X + l*cos(angle), Y + l*sin(angle)) for angle in angles] for l in length_rng])
     assert not np.any(np.isnan(points)), f"Somehow this is creating empty values, with points as {points} and point as {(X, Y)}"
-    points = flattenTo2dPoint(points)
+    points = flattenList(points)
     return points
 
 def findLandscapeElevation(point: tuple[float], transform, index, elevation):#tifPath: str = "D:/Skóli/lokaverkefni_vel/data/elevationPoints/IslandsDEMv1.0_20x20m_isn93_zmasl.tif", band = 1) -> float:
@@ -57,7 +57,7 @@ def findLandscapeElevation(point: tuple[float], transform, index, elevation):#ti
     if len(point_coordinates) < 2:
         return 0
 
-    z = bridgeElevation(point, point_coordinates, point_values)
+    z = interpolateElevation(point, point_coordinates, point_values)
 
     return z if z > -1e20 else 0.0
 
@@ -75,22 +75,9 @@ def generateLandscapeElevation(point, transform, index, elevation):
     if len(point_coordinates) < 2:
         return 0
 
-    z = bridgeElevation(point, point_coordinates, point_values)
+    z = interpolateElevation(point, point_coordinates, point_values)
 
     return z if z > -1e20 else 0.0
-        
-def findLandscapeElevationPoints(points: list[tuple[float]], transform, index, elevation) -> list[float]:
-    """
-    Args:
-        points (list[tuple[float]]): a list of points to estimate the elevation of
-        tifPath (str): a string representation of the path to GeoTiff file of elevation of Iceland
-    Returns:
-        a list of floats representing the elevavtion of points in a distribution
-    """
-    flatPoints = flattenTo2dPoint(points)  
-    res = [findLandscapeElevation(point, transform, index, elevation) for point in flatPoints] #Pickled/Not Pickled
-
-    return res
 
 def generateLandscapeElevationPoints(points, transform, index, elevation):
     res = [generateLandscapeElevation(point, transform, index, elevation) for point in points]
