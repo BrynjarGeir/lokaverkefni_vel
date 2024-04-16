@@ -1,5 +1,2 @@
-get_data
-model
-process_data
-read_data
+python
 utils
