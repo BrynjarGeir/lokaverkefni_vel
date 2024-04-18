@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import pandas as pd, os, dill as pickle
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 from datetime import date
 from utils.transform import getVedurLonLatInISN93
 from utils.util import getTopLevelPath
 
 
-# In[ ]:
+# In[2]:
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
 stationsLonLatXY_path = top_folder + 'stationsLonLatXY.pkl'
 stod_path = top_folder + 'stod.txt'
-nailstripped_path = top_folder + 'combined_10min/Parts/Nailstripped/'
-filteredWithInterval_path = nailstripped_path + 'filteredWithInterval/'
-filteredWithMinAveWindSpeed_path = filteredWithInterval_path + 'filteredWithMinAverageWS/'
+nailstripped_path = top_folder + '10min/Chunks/Nailstripped/'
+filtered_path = nailstripped_path + 'Filtered_AWSL_TimeInterval/'
+outputfolder = top_folder + 'Processed/'
 
 today = date.today().strftime('%Y-%m-%d')
 
@@ -44,10 +44,11 @@ def createStationsLonLatXY(stod_path = stod_path, outputpath = stationsLonLatXY_
 # In[ ]:
 
 
-def filterTopWSInInterval(nailstripped_path = nailstripped_path, threshold: str = '1 day'):
+def filter_AWSL_and_TimeInterval(nailstripped_path = nailstripped_path, threshold: str = '1 day', AWSL: int = 20):
     files = [nailstripped_path + file for file in os.listdir(nailstripped_path) if file.endswith('.feather')]
     for file in tqdm(files, total = len(files), desc = "Looping over nailstripped files..."):
         measurement_df = pd.read_feather(file)
+        measurement_df = measurement_df[measurement_df.f > 20]
         filtered_data, columns, stations = [], measurement_df.columns, measurement_df.stod.unique()
         for station in tqdm(stations, total = len(stations), desc = "Looping over substations..."):
             subset_df = measurement_df[station == measurement_df.stod]
@@ -69,7 +70,7 @@ def filterTopWSInInterval(nailstripped_path = nailstripped_path, threshold: str 
 
         filtered_df = filtered_df.reset_index(drop=True)
 
-        outputpath = nailstripped_path + 'filteredWithInterval/' + file.split('/')[-1]
+        outputpath = nailstripped_path + 'Filtered_AWSL_TimeInterval/' + file.split('/')[-1]
 
         filtered_df.to_feather(outputpath)
 
@@ -77,19 +78,7 @@ def filterTopWSInInterval(nailstripped_path = nailstripped_path, threshold: str 
 # In[ ]:
 
 
-def filterMinAveWindSpeed(filteredWithInterval_path = filteredWithInterval_path, limit = 20):
-    files = [filteredWithInterval_path + file for file in os.listdir(filteredWithInterval_path) if file.endswith('.feather')]
-    for file in tqdm(files, total = len(files), desc = "Looping over filtere with interval files..."):
-        df = pd.read_feather(file)
-        df = df[df.f >= limit]
-        outputpath = filteredWithInterval_path + 'filteredWithMinAverageWS/' + file.split('/')[-1]
-        df.to_feather(outputpath)
-
-
-# In[ ]:
-
-
-def combineParts(filteredWithMinAveWindSpeed_path = filteredWithMinAveWindSpeed_path):
+def combineParts(filteredWithMinAveWindSpeed_path = filtered_path):
     df, files = pd.DataFrame(), [filteredWithMinAveWindSpeed_path + file for file in os.listdir(filteredWithMinAveWindSpeed_path) if file.endswith('.feather')]
 
     for file in tqdm(files, total = len(files), desc = "Looping over parts to combine..."):
@@ -98,6 +87,6 @@ def combineParts(filteredWithMinAveWindSpeed_path = filteredWithMinAveWindSpeed_
         else:
             tmp_df = pd.read_feather(file)
             df = pd.concat([df, tmp_df])
-    outputpath = top_folder + f'combined_10min/Ready/combined_10min_{today}.feather'
+    outputpath = outputfolder + f'/measurements_{today}.feather'
     df.to_feather(outputpath)
 

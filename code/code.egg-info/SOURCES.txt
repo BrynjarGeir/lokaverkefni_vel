@@ -5,9 +5,10 @@ code.egg-info/dependency_links.txt
 code.egg-info/top_level.txt
 python/__init__.py
 python/preprocess/__init__.py
-python/preprocess/addElevation.py
+python/preprocess/downloadMeasurements.py
 python/preprocess/filterMeasurements.py
 python/preprocess/generateJSONForCARRA.py
+python/preprocess/mergeData.py
 python/preprocess/mergeMeasuredReanalysis.py
 python/preprocess/nailstripData.py
 python/preprocess/processMeasurements.py

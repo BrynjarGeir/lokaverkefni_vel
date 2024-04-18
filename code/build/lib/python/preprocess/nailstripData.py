@@ -5,16 +5,16 @@
 
 
 from utils.util import getTopLevelPath, next_hour
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import os, pandas as pd
 
 
 # In[ ]:
 
 
-folder_path = getTopLevelPath() + 'Measured/'
-hourly_path = folder_path + 'combined_klst/' + max(os.listdir(folder_path + 'Measured/combined_klst/'), key = lambda f: os.path.getmtime(folder_path + 'Measured/combined_klst/' + f))
-base10min_path = folder_path + 'combined_10min/Parts/' 
+folder_path = getTopLevelPath() + 'data/Measured/'
+hourly_path = folder_path + 'combined_klst/' + max(os.listdir(folder_path + 'combined_klst/'), key = lambda f: os.path.getmtime(folder_path + 'combined_klst/' + f))
+base10min_path = folder_path + '10min/Chunks/' 
 
 
 # In[1]:

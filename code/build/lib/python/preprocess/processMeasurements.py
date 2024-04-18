@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[3]:
 
 
 from utils.util import getTopLevelPath
 from datetime import date
-from tqdm import tqdm, trange
+from tqdm.notebook import tqdm, trange
 import os, csv, pandas as pd
 
 
-# In[ ]:
+# In[4]:
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
-hourly_paths = [top_folder + 'klst/', top_folder + 'vg/']
+hourly_paths = [top_folder + 'klst/', top_folder + 'vg/'] # just 'klst' I think with new download
 ten_min_path = top_folder + '10min/'
 
 today = date.today().strftime('%Y-%m-%d')
@@ -23,8 +23,8 @@ today = date.today().strftime('%Y-%m-%d')
 # In[ ]:
 
 
-def combineKLST(hourly_paths: str = hourly_paths):
-    outputpath: str = top_folder + f'combined/combined_klst/combined_klst_{today}.feather'
+def combineKLST(hourly_path: str = hourly_paths):
+    outputpath: str = top_folder + f'/combined_klst/combined_klst_{today}.feather'
     files = [folder + file for folder in hourly_paths for file in os.listdir(folder)]
     columns = ['timi','stod','f','fx','fg','d']
     data = []
@@ -46,12 +46,12 @@ def combineKLST(hourly_paths: str = hourly_paths):
     df.to_feather(outputpath)
 
 
-# In[ ]:
+# In[7]:
 
 
 def combine10minChunks(ten_min_path: str = ten_min_path): 
-    outputpath = top_folder + f'/combined_10min/Parts/'
-    files = [ten_min_path + file for file in os.listdir(ten_min_path)]
+    outputpath = top_folder +   '/10min/Chunks/'
+    files = [ten_min_path + file for file in os.listdir(ten_min_path) if file.endswith('.txt')]
     columns = None
     chunks, n = 20, len(files)
     m = n // chunks
@@ -80,21 +80,11 @@ def combine10minChunks(ten_min_path: str = ten_min_path):
         df.d = pd.to_numeric(df.d, errors = 'coerce')
         df.dsdev = pd.to_numeric(df.dsdev, errors = 'coerce')
 
-        df.to_feather(outputpath + 'part_' + str(chunk) + '.feather')
+        df.to_feather(outputpath + 'chunk_' + str(chunk) + '.feather')
 
 
-# In[ ]:
+# In[8]:
 
 
-def combine10minText(ten_min_path: str = ten_min_path):
-    outputpath: str = top_folder +  '/combined_10min.txt'
-    files = [os.path.join(ten_min_path, file) for file in os.listdir(ten_min_path)]
-
-    for file in tqdm(files, total = len(files)):
-        with open(file, 'r') as f:
-            lines = f.readlines()
-        
-        lines = lines[1:]
-        with open(outputpath, 'a+') as f:
-            f.writelines(lines)
+combine10minChunks()
 

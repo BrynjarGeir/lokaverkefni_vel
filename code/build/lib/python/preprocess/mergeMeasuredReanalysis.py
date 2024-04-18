@@ -7,7 +7,10 @@
 import pandas as pd, dill as pickle, os
 from utils.calculateConstants import *
 from utils.util import getTopLevelPath
+from utils.elevation import generateLandscapeDistribution2Sectors, generateElevationDistribution, findLandscapeElevation
 from datetime import date
+
+import pandas as pd, rasterio, os
 
 
 # In[ ]:
@@ -15,10 +18,20 @@ from datetime import date
 
 folder_path =  getTopLevelPath() + 'data/'
 stationsLonLatXY_path = folder_path + 'Measured/stationsLonLatXY.pkl'
-measured_path = folder_path + 'Measured/combined_10min/' + max(os.listdir(folder_path + 'Measured/combined_10min/'), key = lambda f: os.path.getmtime(folder_path + 'Measured/combined_10min/' + f))
+measured_path = folder_path + 'Measured/Processed/' + max(os.listdir(folder_path + 'Measured/Processed/'), key = lambda f: os.path.getmtime(folder_path + 'Measured/Processed/' + f))
 reanalysis_path = folder_path + 'Reanalysis/' + max([file for file in os.listdir(folder_path + 'Reanalysis/') if file.endswith('.feather')], key = lambda f: os.path.getmtime(folder_path + 'Reanalysis/' + f))
+elevation_path = folder_path + "Elevation/IslandsDEMv1.0_20x20m_isn93_zmasl.tif"
 
 today = date.today().strftime("%Y-%m-%d")
+outputpath = folder_path + f'Model/data_{today}.feather'
+
+
+# In[ ]:
+
+
+def addPointElevation(row, transform, index, elevation):
+    X, Y = row.X, row.Y
+    return findLandscapeElevation((X,Y), transform, index, elevation)
 
 
 # In[3]:
@@ -63,6 +76,23 @@ def prepareRenalysis(df, decimal_places = 4):
 # In[ ]:
 
 
+def addElevation(df):
+
+    with rasterio.open(elevation_path) as dataset:
+        elevation = dataset.read(1)
+        index = dataset.index
+        transform = dataset.transform
+
+    df['station_elevation'] = df.apply(addPointElevation, args = (transform, index, elevation), axis = 1)
+    df['landscape_points'] = df.apply(generateLandscapeDistribution2Sectors, axis = 1)
+    df['elevations']  = df.apply(generateElevationDistribution, args = (transform, index, elevation), axis = 1)
+
+    return df
+
+
+# In[ ]:
+
+
 def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
     measured_df = pd.read_feather(measured_path)
     reanalysis_df = pd.read_feather(reanalysis_path)
@@ -71,7 +101,7 @@ def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
     merged_df = pd.merge(measured_df, reanalysis_df, on = ['time', 'X', 'Y'], how = 'inner')
     merged_df[['N_01', 'N_12', 'N_02']] = merged_df[['N_01', 'N_12', 'N_02']].map(lambda x: (x.real, x.imag))
     merged_df = merged_df.drop(['fsdev', 'dsdev'], axis = 1)
+    merged_df = addElevation(merged_df)
 
-    outputpath = folder_path + f'MergedMeasuredReanalysis/merged_{today}.feather'
     merged_df.to_feather(outputpath)
 

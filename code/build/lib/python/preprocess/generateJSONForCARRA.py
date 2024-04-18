@@ -14,7 +14,7 @@ import pandas as pd, dill as pickle, json, os
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
-folder = 'combined_10min/Ready/'
+folder = 'Processed/'
 file_path = max((top_folder + folder + file for file in os.listdir(top_folder + folder) if file.endswith('.feather')), key=os.path.getmtime, default=None) 
 stationsLonLatXY_path = top_folder + 'stationsLonLatXY.pkl'
 

@@ -1,4 +1,4 @@
-import os,subprocess
+import os, subprocess
 from utils.util import getTopLevelPath
 
 def convert_notebook_to_python(notebook_path, python_path, output_format = 'script'):

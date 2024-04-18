@@ -1,6 +1,6 @@
 from math import dist
 from datetime import date
-import getpass, numpy as np
+import os, numpy as np
 
 def getDistances(point, points) -> list[float]:
     return [dist(point, p) for p in points]
@@ -20,7 +20,7 @@ def next_hour(timi):
     return timi.ceil('h')
 
 def is_laptop():
-    return not 'Brynjar Geir' == getpass.getuser()
+    return not 'Brynjar Geir' == os.getlogin()
 
 def getTopLevelPath():
     folder_path = 'D:/Skoli/Mastersverkefni/lokaverkefni_vel/' if is_laptop() else 'C:/Users/Brynjar Geir/Documents/Mastersverkefni/lokaverkefni_vel/'
