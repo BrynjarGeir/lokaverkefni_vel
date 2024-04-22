@@ -1,6 +1,6 @@
 data/
 .venv/
+.vscode/
 code/build
 code/__pycache__
 code/code.egg-info
-code/jonasson2

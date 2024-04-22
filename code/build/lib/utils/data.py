@@ -1,4 +1,4 @@
-import pandas as pd, numpy as np, os
+import pandas as pd, numpy as np, dill as pickle, os
 from utils.util import getTopLevelPath
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -56,6 +56,24 @@ def get_data():
     df = pd.concat([df, df_unfolded], axis = 1)
     df = df.drop(['index'], axis = 1)
     return df
+
+def get_stats(WithAWSL = False):
+    folder = getTopLevelPath() + 'data/Measured/Stats/'
+    if WithAWSL:
+        folder += 'WithAWSL/'
+    with open(folder + 'windspeeds_stats.pkl', 'rb') as f:
+        windspeeds = pickle.load(f)
+    with open(folder + 'gustspeeds_stats.pkl', 'rb') as f:
+        gustpeeds = pickle.load(f)
+    with open(folder + 'winddirections_stats.pkl', 'rb') as f:
+        winddirections = pickle.load(f)
+    with open(folder + 'years_stats.pkl', 'rb') as f:
+        years = pickle.load(f)
+    with open(folder + 'months_stats.pkl', 'rb') as f:
+        months = pickle.load(f)
+
+    return windspeeds, gustpeeds, winddirections, years, months
+
 
 # Get data for training and such    
 def get_normalized_data():
