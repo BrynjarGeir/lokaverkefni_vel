@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[ ]:
 
 
 from utils.util import getTopLevelPath
@@ -10,13 +10,12 @@ from tqdm.notebook import tqdm, trange
 import os, csv, pandas as pd
 
 
-# In[4]:
+# In[ ]:
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
 hourly_paths = [top_folder + 'klst/', top_folder + 'vg/'] # just 'klst' I think with new download
 ten_min_path = top_folder + '10min/'
-
 today = date.today().strftime('%Y-%m-%d')
 
 
@@ -46,7 +45,7 @@ def combineKLST(hourly_path: str = hourly_paths):
     df.to_feather(outputpath)
 
 
-# In[7]:
+# In[ ]:
 
 
 def combine10minChunks(ten_min_path: str = ten_min_path): 
@@ -81,10 +80,4 @@ def combine10minChunks(ten_min_path: str = ten_min_path):
         df.dsdev = pd.to_numeric(df.dsdev, errors = 'coerce')
 
         df.to_feather(outputpath + 'chunk_' + str(chunk) + '.feather')
-
-
-# In[8]:
-
-
-combine10minChunks()
 

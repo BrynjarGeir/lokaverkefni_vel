@@ -103,5 +103,10 @@ def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
     merged_df = merged_df.drop(['fsdev', 'dsdev'], axis = 1)
     merged_df = addElevation(merged_df)
 
+    # Drop the year 2019 from station 613 (Selfoss). It was setup in 2019 and there were errors from when it was just setup (fg <= f)
+    # I'll drop the entire year instead of just dropping these values. This shouldn't really affect the filtering because I am getting
+    # rid of the entire station in a large time interval, just a bit fewer points.
+    merged_df = merged_df[~((613 == merged_df.stod) & (2019 == merged_df.time.dt.year))]
+
     merged_df.to_feather(outputpath)
 

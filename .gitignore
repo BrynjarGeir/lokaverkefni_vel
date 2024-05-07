@@ -1,6 +1,9 @@
 data/
 .venv/
+.vscode/
 code/build
 code/__pycache__
 code/code.egg-info
-code/jonasson2
+code/notebooks/model/Tries/
+code/notebooks/model/saved_models/
+code/notebooks/model/logs/

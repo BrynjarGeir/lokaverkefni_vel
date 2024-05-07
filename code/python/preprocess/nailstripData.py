@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[18]:
+# In[2]:
 
 
 from utils.util import getTopLevelPath, next_hour
@@ -9,7 +9,7 @@ from tqdm.notebook import tqdm
 import os, pandas as pd
 
 
-# In[ ]:
+# In[3]:
 
 
 folder_path = getTopLevelPath() + 'data/Measured/'
@@ -17,7 +17,7 @@ hourly_path = folder_path + 'combined_klst/' + max(os.listdir(folder_path + 'com
 base10min_path = folder_path + '10min/Chunks/' 
 
 
-# In[1]:
+# In[4]:
 
 
 def getHourlyDf(hourly_path = hourly_path):
@@ -30,10 +30,10 @@ def getHourlyDf(hourly_path = hourly_path):
     return hourly_df
 
 
-# In[27]:
+# In[7]:
 
 
-def nailstripBase10min(hourly_path = hourly_path, base10min_path = base10min_path):
+def nailstripBase10min(hourly_path = hourly_path, base10min_path = base10min_path, threshold = int(1e-2)):
     hourly_df = getHourlyDf(hourly_path)
     files = [base10min_path + file for file in os.listdir(base10min_path)]
     files = [file for file in files if file.endswith('.feather')]
@@ -43,7 +43,7 @@ def nailstripBase10min(hourly_path = hourly_path, base10min_path = base10min_pat
         df['next_hour'] = df.timi.apply(next_hour)
         hourly_df = hourly_df.rename(columns = {'timi': 'next_hour'})
         df = pd.merge(df, hourly_df, on = ['stod', 'next_hour'], how = 'inner', suffixes=('_current', '_hourly'))
-        df = df[(df.f_current <= df.fx) & (df.fg_current <= df.fg_hourly)]
+        df = df[(df.f_current <= df.fx + threshold) & (df.fg_current <= df.fg_hourly)]
         df = df.drop(['f_hourly', 'fg_hourly', 'fx', 'd_hourly', 'next_hour'], axis = 1)
         df = df.rename(columns = {'f_current': 'f', 'fg_current': 'fg', 'd_current': 'd'})
         df.to_feather(base10min_path + 'Nailstripped/part_' + str(i) + '.feather')

@@ -23,7 +23,7 @@ def is_laptop():
     return not 'Brynjar Geir' == os.getlogin()
 
 def getTopLevelPath():
-    folder_path = 'D:/Skoli/Mastersverkefni/lokaverkefni_vel/' if is_laptop() else 'C:/Users/Brynjar Geir/Documents/Mastersverkefni/lokaverkefni_vel/'
+    folder_path = 'C:/Users/brynj/Documents/Mastersverkefni/lokaverkefni_vel/' if is_laptop() else 'C:/Users/Brynjar Geir/Documents/Mastersverkefni/lokaverkefni_vel/'
     return folder_path
 
 def getToday():
