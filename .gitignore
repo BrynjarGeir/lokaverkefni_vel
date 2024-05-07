@@ -2,8 +2,8 @@ data/
 .venv/
 .vscode/
 code/build/
-code/__pycache__
-code/code.egg-info
+code/__pycache__/
+code/code.egg-info/
 code/notebooks/model/Tries/
 code/notebooks/model/saved_models/
 code/notebooks/model/logs/
