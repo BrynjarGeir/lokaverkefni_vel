@@ -1,7 +1,7 @@
 data/
 .venv/
 .vscode/
-code/build
+code/build/
 code/__pycache__
 code/code.egg-info
 code/notebooks/model/Tries/
