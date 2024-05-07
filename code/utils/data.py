@@ -78,8 +78,11 @@ def get_stats(WithAWSL = False):
         winddirections = pickle.load(f)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     with open(folder + 'gust_factor_stats.pkl', 'rb') as f:
         gustfactor = pickle.load(f)
+=======
+>>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
 =======
 >>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
 =======
@@ -91,7 +94,11 @@ def get_stats(WithAWSL = False):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     return windspeeds, gustpeeds, winddirections, gustfactor, years, months
+=======
+    return windspeeds, gustpeeds, winddirections, years, months
+>>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
 =======
     return windspeeds, gustpeeds, winddirections, years, months
 >>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
