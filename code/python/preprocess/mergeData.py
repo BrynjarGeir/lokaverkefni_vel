@@ -13,7 +13,7 @@ from datetime import date
 import pandas as pd, rasterio, os
 
 
-# In[ ]:
+# In[2]:
 
 
 folder_path =  getTopLevelPath() + 'data/'
@@ -24,9 +24,10 @@ elevation_path = folder_path + "Elevation/IslandsDEMv1.0_20x20m_isn93_zmasl.tif"
 
 today = date.today().strftime("%Y-%m-%d")
 outputpath = folder_path + f'Model/data_{today}.feather'
+outputpath_for_errors = folder_path + f'Model/Errors/error_{today}.feather'
 
 
-# In[ ]:
+# In[3]:
 
 
 def addPointElevation(row, transform, index, elevation):
@@ -34,7 +35,7 @@ def addPointElevation(row, transform, index, elevation):
     return findLandscapeElevation((X,Y), transform, index, elevation)
 
 
-# In[3]:
+# In[4]:
 
 
 def addXYtoMeasured(row, stationsLonLatXY_path):
@@ -45,7 +46,7 @@ def addXYtoMeasured(row, stationsLonLatXY_path):
     return pd.Series(values[2:])
 
 
-# In[ ]:
+# In[5]:
 
 
 def prepareMeasurements(df, stationsLonLatXY_path, decimal_places = 4):
@@ -55,7 +56,7 @@ def prepareMeasurements(df, stationsLonLatXY_path, decimal_places = 4):
     return df
 
 
-# In[ ]:
+# In[6]:
 
 
 def prepareRenalysis(df, decimal_places = 4):
@@ -73,7 +74,7 @@ def prepareRenalysis(df, decimal_places = 4):
     return df
 
 
-# In[ ]:
+# In[7]:
 
 
 def addElevation(df):
@@ -90,7 +91,7 @@ def addElevation(df):
     return df
 
 
-# In[ ]:
+# In[8]:
 
 
 def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
@@ -103,10 +104,12 @@ def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
     merged_df = merged_df.drop(['fsdev', 'dsdev'], axis = 1)
     merged_df = addElevation(merged_df)
 
-    # Drop the year 2019 from station 613 (Selfoss). It was setup in 2019 and there were errors from when it was just setup (fg <= f)
-    # I'll drop the entire year instead of just dropping these values. This shouldn't really affect the filtering because I am getting
-    # rid of the entire station in a large time interval, just a bit fewer points.
-    merged_df = merged_df[~((613 == merged_df.stod) & (2019 == merged_df.time.dt.year))]
+    # For some reason there are several stations that contain invalid data, maybe f and fg got switched or something, and f
+    # is higher than fg. If it is something else and more errors are still in the data even after removing this. Then I don't
+    # know what is going on or what I am supposed to do.
+    errors = merged_df[merged_df.fg <= merged_df.f]
+    merged_df = merged_df[merged_df.fg > merged_df.f]
 
     merged_df.to_feather(outputpath)
+    errors.to_feather(outputpath_for_errors)
 
