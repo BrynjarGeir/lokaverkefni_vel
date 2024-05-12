@@ -8,6 +8,7 @@ import pandas as pd, dill as pickle, os
 from utils.calculateConstants import *
 from utils.util import getTopLevelPath
 from utils.elevation import generateLandscapeDistribution2Sectors, generateElevationDistribution, findLandscapeElevation
+from utils.transform import transformISN93ToWGS84
 from datetime import date
 
 import pandas as pd, rasterio, os
@@ -35,34 +36,34 @@ def addPointElevation(row, transform, index, elevation):
     return findLandscapeElevation((X,Y), transform, index, elevation)
 
 
-# In[4]:
+# In[19]:
 
 
-def addXYtoMeasured(row, stationsLonLatXY_path):
+def addLonLatXYtoMeasured(row, stationsLonLatXY_path):
     with open(stationsLonLatXY_path, 'rb') as f:
         stationsLonLatXY = pickle.load(f)
     station = row.stod
     values = stationsLonLatXY.get(station, [None, None, None, None])
-    return pd.Series(values[2:])
+    return pd.Series(values)
 
 
-# In[5]:
+# In[20]:
 
 
 def prepareMeasurements(df, stationsLonLatXY_path, decimal_places = 4):
     df = df.rename(columns = {'timi':'time'})
-    df[['X', 'Y']] = df.apply(addXYtoMeasured, args=[stationsLonLatXY_path], axis = 1)
+    df[['lon', 'lat', 'X', 'Y']] = df.apply(addLonLatXYtoMeasured, args=[stationsLonLatXY_path], axis = 1)
     df = df.round(decimal_places)
     return df
 
 
-# In[6]:
+# In[17]:
 
 
 def prepareRenalysis(df, decimal_places = 4):
-    df = df.rename(columns = {'lat':'Y', 'lon':'X', 'Wind speed':'ws', 'Wind direction': 'wd', 'Pressure':'p', 'Temperature':'t'})
-    df = df.drop_duplicates(subset=['X', 'Y', 'time', 'height_level'])
-    df = df.pivot(index = ['X', 'Y', 'time'], columns = 'height_level')
+    df = df.rename(columns = {'Wind speed':'ws', 'Wind direction': 'wd', 'Pressure':'p', 'Temperature':'t'})
+    df = df.drop_duplicates(subset=['lon', 'lat', 'time', 'height_level'])
+    df = df.pivot(index = ['lon', 'lat', 'time'], columns = 'height_level')
     df = df.drop(columns='yr_month')
     df.columns = [f'{col[0]}_{col[1]}' for col in df.columns]
     df = df.reset_index()
@@ -91,7 +92,7 @@ def addElevation(df):
     return df
 
 
-# In[8]:
+# In[22]:
 
 
 def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
@@ -99,7 +100,7 @@ def merge(measured_path = measured_path, reanalysis_path = reanalysis_path):
     reanalysis_df = pd.read_feather(reanalysis_path)
     measured_df = prepareMeasurements(measured_df, stationsLonLatXY_path)
     reanalysis_df = prepareRenalysis(reanalysis_df)
-    merged_df = pd.merge(measured_df, reanalysis_df, on = ['time', 'X', 'Y'], how = 'inner')
+    merged_df = pd.merge(measured_df, reanalysis_df, on = ['time', 'lon', 'lat'], how = 'inner')
     merged_df[['N_01', 'N_12', 'N_02']] = merged_df[['N_01', 'N_12', 'N_02']].map(lambda x: (x.real, x.imag))
     merged_df = merged_df.drop(['fsdev', 'dsdev'], axis = 1)
     merged_df = addElevation(merged_df)

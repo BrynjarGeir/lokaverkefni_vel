@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 from utils.transform import transformISN93ToWGS84
@@ -10,7 +10,7 @@ from datetime import date
 import pandas as pd, dill as pickle, json, os
 
 
-# In[ ]:
+# In[2]:
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
