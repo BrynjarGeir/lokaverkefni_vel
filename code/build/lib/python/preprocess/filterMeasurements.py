@@ -20,7 +20,10 @@ stod_path = top_folder + 'stod.txt'
 nailstripped_path = top_folder + '10min/Chunks/Nailstripped/'
 filtered_path = nailstripped_path + 'Filtered_AWSL_TimeInterval/'
 filtered_path_CARRA_HOURS = nailstripped_path + 'Filtered_AWSL_TimeInterval_CARRA_HOURS/'
+<<<<<<< HEAD
 filtered_path_Only_CARRA_HOURS = nailstripped_path + 'Filtered_ONLY_CARRA_HOURS/'
+=======
+>>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
 outputfolder = top_folder + 'Processed/'
 
 today = date.today().strftime('%Y-%m-%d')
@@ -114,6 +117,7 @@ def filter_AWSL_and_TimeInterval_CARRA_HOURS(nailstripped_path = nailstripped_pa
         filtered_df.to_feather(outputpath)
 
 
+<<<<<<< HEAD
 # In[ ]:
 
 
@@ -126,6 +130,8 @@ def filter_CARRA_HOURS(nailstripped_path = nailstripped_path):
         measurement_df.to_feather(outputpath)
 
 
+=======
+>>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
 # In[ ]:
 
 
@@ -157,6 +163,7 @@ def combineParts_CARRA_HOURS(filteredWithMinAveWindSpeed_path = filtered_path_CA
     outputpath = outputfolder + f'/measurements_CARRA_HOURS_{today}.feather'
     df.to_feather(outputpath)
 
+<<<<<<< HEAD
 
 # In[ ]:
 
@@ -173,3 +180,5 @@ def combineParts_ONLY_CARRA_HOURS(filteredByCARRAHOURS_path = filtered_path_Only
     outputpath = outputfolder + f'/measurements_ONLY_CARRA_HOURS_{today}.feather'
     df.to_feather(outputpath)
 
+=======
+>>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
