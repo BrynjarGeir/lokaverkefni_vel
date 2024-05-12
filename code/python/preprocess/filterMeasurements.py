@@ -20,6 +20,7 @@ stod_path = top_folder + 'stod.txt'
 nailstripped_path = top_folder + '10min/Chunks/Nailstripped/'
 filtered_path = nailstripped_path + 'Filtered_AWSL_TimeInterval/'
 filtered_path_CARRA_HOURS = nailstripped_path + 'Filtered_AWSL_TimeInterval_CARRA_HOURS/'
+filtered_path_Only_CARRA_HOURS = nailstripped_path + 'Filtered_ONLY_CARRA_HOURS/'
 outputfolder = top_folder + 'Processed/'
 
 today = date.today().strftime('%Y-%m-%d')
@@ -116,6 +117,18 @@ def filter_AWSL_and_TimeInterval_CARRA_HOURS(nailstripped_path = nailstripped_pa
 # In[ ]:
 
 
+def filter_CARRA_HOURS(nailstripped_path = nailstripped_path):
+    files = [nailstripped_path + file for file in os.listdir(nailstripped_path) if file.endswith('.feather')]
+    for file in tqdm(files, total = len(files), desc = "Looping over nailstripped files..."):
+        measurement_df = pd.read_feather(file)
+        measurement_df = measurement_df[(measurement_df.timi.dt.hour.isin([i * 3 for i in range(8)])) & (0 == measurement_df.timi.dt.minute)]
+        outputpath = nailstripped_path + 'Filtered_ONLY_CARRA_HOURS/' + file.split('/')[-1]
+        measurement_df.to_feather(outputpath)
+
+
+# In[ ]:
+
+
 def combineParts(filteredWithMinAveWindSpeed_path = filtered_path):
     df, files = pd.DataFrame(), [filteredWithMinAveWindSpeed_path + file for file in os.listdir(filteredWithMinAveWindSpeed_path) if file.endswith('.feather')]
 
@@ -142,5 +155,21 @@ def combineParts_CARRA_HOURS(filteredWithMinAveWindSpeed_path = filtered_path_CA
             tmp_df = pd.read_feather(file)
             df = pd.concat([df, tmp_df])
     outputpath = outputfolder + f'/measurements_CARRA_HOURS_{today}.feather'
+    df.to_feather(outputpath)
+
+
+# In[ ]:
+
+
+def combineParts_ONLY_CARRA_HOURS(filteredByCARRAHOURS_path = filtered_path_Only_CARRA_HOURS):
+    df, files = pd.DataFrame(), [filteredByCARRAHOURS_path + file for file in os.listdir(filteredByCARRAHOURS_path) if file.endswith('.feather')]
+
+    for file in tqdm(files, total = len(files), desc = "Looping over parts to combine..."):
+        if df.empty:
+            df = pd.read_feather(file)
+        else:
+            tmp_df = pd.read_feather(file)
+            df = pd.concat([df, tmp_df])
+    outputpath = outputfolder + f'/measurements_ONLY_CARRA_HOURS_{today}.feather'
     df.to_feather(outputpath)
 

@@ -53,6 +53,13 @@ def getXY(stod, stationsLonLatXY):
     return stationsLonLatXY[stod][2:]
 
 
+# In[ ]:
+
+
+def getLatLon(stod, stationsLonLatXY):
+    return stationsLonLatXY[stod][:2][::-1]
+
+
 # In[7]:
 
 
@@ -61,12 +68,11 @@ def generateListOfDatetimesCoordinates(file_path = file_path, stations_LonLatXY_
     with open(stations_LonLatXY_path, 'rb') as f:
         stationsLonLatXY = pickle.load(f)
 
-    vedurDF['X'], vedurDF['Y'] = zip(*vedurDF['stod'].apply(lambda x: getXY(x, stationsLonLatXY)))
-    #vedurDF['X'], vedurDF['Y'] = zip(*vedurDF.stod.map(getXY, args = [stationsLonLatXY]))
-    vedurDF = vedurDF.dropna(subset = ['timi', 'f', 'fg', 'stod', 'd', 'X', 'Y'])
-    vedurDF['pointsYX'] = list(zip(vedurDF.Y, vedurDF.X))
+    vedurDF['lat'], vedurDF['lon'] = zip(*vedurDF['stod'].apply(lambda stod: getLatLon(stod, stationsLonLatXY)))
+    vedurDF = vedurDF.dropna(subset = ['timi', 'f', 'fg', 'stod', 'd', 'lat', 'lon'])
+    vedurDF['pointsLatLon'] = list(zip(vedurDF.lat, vedurDF.lon))
     
-    grouped_df = vedurDF.groupby('timi').agg({'pointsYX':list}).reset_index()
+    grouped_df = vedurDF.groupby('timi').agg({'pointsLatLon':list}).reset_index()
     grouped_df.timi = pd.to_datetime(grouped_df.timi)
     grouped_df.timi = grouped_df.timi.dt.strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -80,12 +86,12 @@ def generateAllJSON():
     today = date.today().strftime("%Y-%m-%d")
     output_path = top_folder + f'JSON/CARRA_{today}.json'
     grouped_df = generateListOfDatetimesCoordinates()
-    grouped_df['JSON'] = grouped_df.apply(lambda row: generateJSON(row.pointsYX, row.timi), axis = 1)
+    grouped_df['JSON'] = grouped_df.apply(lambda row: generateJSON(row.pointsLatLon, row.timi), axis = 1)
     coords_dict = {key: value for d in grouped_df.JSON for key, value in d.items()}
 
     res = {"param": {"product_type": "analysis",
                      "variable": ["Wind speed", "Wind direction", "Pressure", "Temperature"],
-                     "height_levels": [15,150,250,500],
+                     "height_levels": [15,250,500],
                      "feather_file": "interpolatedCarra.feather"},
             "timestamp_location": coords_dict}
     

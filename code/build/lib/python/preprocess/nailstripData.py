@@ -43,7 +43,7 @@ def nailstripBase10min(hourly_path = hourly_path, base10min_path = base10min_pat
         df['next_hour'] = df.timi.apply(next_hour)
         hourly_df = hourly_df.rename(columns = {'timi': 'next_hour'})
         df = pd.merge(df, hourly_df, on = ['stod', 'next_hour'], how = 'inner', suffixes=('_current', '_hourly'))
-        df = df[(df.f_current <= df.fx + threshold) & (df.fg_current <= df.fg_hourly)]
+        df = df[(df.f_current <= df.fx + threshold) & (abs(df.fg_current - df.fg_hourly) <= threshold)]
         df = df.drop(['f_hourly', 'fg_hourly', 'fx', 'd_hourly', 'next_hour'], axis = 1)
         df = df.rename(columns = {'f_current': 'f', 'fg_current': 'fg', 'd_current': 'd'})
         df.to_feather(base10min_path + 'Nailstripped/part_' + str(i) + '.feather')
