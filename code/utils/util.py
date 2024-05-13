@@ -1,13 +1,5 @@
-from math import dist
 from datetime import date
 import os, numpy as np
-
-def getDistances(point, points) -> list[float]:
-    return [dist(point, p) for p in points]
-
-def getWeights(distances, T, d) -> list[float]:
-    res = [(1-di/T) / d for di in distances]
-    return res
 
 def flattenList(lst: list[list]) -> list:
     flatten_list = []

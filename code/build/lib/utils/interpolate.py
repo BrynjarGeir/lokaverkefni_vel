@@ -1,4 +1,5 @@
-from utils.util import getDistances, getWeights
+import numpy as np
+
 
 def interpolateElevation(point: tuple[float], points: list[tuple[float]], point_values: list[tuple[float]]) -> float:
     """
@@ -9,14 +10,11 @@ def interpolateElevation(point: tuple[float], points: list[tuple[float]], point_
         A single value representing the elevation at given point
     """
     try:
-        distances = getDistances(point, points)
+        distances = np.linalg.norm(np.array(points) - np.array(point), axis = 1)
         T, d = sum(distances), len(points)
-        weights = getWeights(distances, T, d-1)
+        weights = (T - distances) / ((d-1) * T)
 
-        assert round(sum(weights),6) == 1, "The weights didn't sum up to 1"
+        return np.sum(weights * point_values)
 
-        res = sum([weights[i] * point_values[i] for i in range(d)])
-
-        return res
     except Exception as e:
         print(f"Unable to bridge elevation with exception {e}")
