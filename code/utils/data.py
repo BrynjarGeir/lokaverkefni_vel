@@ -2,24 +2,7 @@ import pandas as pd, numpy as np, dill as pickle, os
 from utils.util import getTopLevelPath
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
 from math import cos, pi
-
-def applyPCA(df: pd.DataFrame, n_components: int = 10):
-    n_elevations = df.columns[-1] + 1
-    df.iloc[:, -n_elevations:] = df.iloc[:, -n_elevations:].sub(df.station_elevation, axis = 0)
-
-    df_landscape_elevation = df.iloc[:, -n_elevations:]
-    df_landscape_elevation = (df_landscape_elevation - df_landscape_elevation.mean()) / df_landscape_elevation.std()
-
-    pca = PCA(n_components=n_components)
-    compressed_features = pca.fit_transform(df_landscape_elevation)
-
-    compressed_df = pd.DataFrame(data = compressed_features, columns = ['PC' + str(i) for i in range(n_components)])
-
-    df = pd.concat([df, compressed_df], axis = 1)
-
-    return df
 
 # Rounds to next hour so as to be able to directly compare with the vedur klst file
 def next_hour(timi):
@@ -76,35 +59,13 @@ def get_stats(WithAWSL = False):
         gustpeeds = pickle.load(f)
     with open(folder + 'winddirections_stats.pkl', 'rb') as f:
         winddirections = pickle.load(f)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     with open(folder + 'gust_factor_stats.pkl', 'rb') as f:
         gustfactor = pickle.load(f)
-=======
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
-=======
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
-=======
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
     with open(folder + 'years_stats.pkl', 'rb') as f:
         years = pickle.load(f)
     with open(folder + 'months_stats.pkl', 'rb') as f:
         months = pickle.load(f)
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     return windspeeds, gustpeeds, winddirections, gustfactor, years, months
-=======
-    return windspeeds, gustpeeds, winddirections, years, months
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
-=======
-    return windspeeds, gustpeeds, winddirections, years, months
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
-=======
-    return windspeeds, gustpeeds, winddirections, years, months
->>>>>>> b04b3c723532e763012997ddf8c08d4e05cf96b2
 
 
 # Get data for training and such    
@@ -121,7 +82,7 @@ def get_normalized_data():
     n_components = df_unfolded.shape[1]
     df.iloc[:, -n_components:] = df.iloc[:, -n_components:].sub(df.station_elevation, axis = 0)
 
-    df = df.drop(['landscape_points', 'elevations', 'N_01', 'N_12', 'N_02'], axis = 1)
+    df = df.drop(['elevations', 'N_01', 'N_12', 'N_02', 'XYd'], axis = 1)
     df = df.replace([-np.inf, np.inf], np.nan)
     df = df.dropna()
     df.columns = df.columns.astype(str)
