@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[2]:
 
 
 import pandas as pd, os, dill as pickle
@@ -11,7 +11,7 @@ from utils.transform import getVedurLonLatInISN93
 from utils.util import getTopLevelPath
 
 
-# In[10]:
+# In[3]:
 
 
 top_folder = getTopLevelPath() + 'data/Measured/'
@@ -20,10 +20,9 @@ stod_path = top_folder + 'stod.txt'
 nailstripped_path = top_folder + '10min/Chunks/Nailstripped/'
 filtered_path = nailstripped_path + 'Filtered_AWSL_TimeInterval/'
 filtered_path_CARRA_HOURS = nailstripped_path + 'Filtered_AWSL_TimeInterval_CARRA_HOURS/'
-<<<<<<< HEAD
 filtered_path_Only_CARRA_HOURS = nailstripped_path + 'Filtered_ONLY_CARRA_HOURS/'
-=======
->>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
+klst_path = top_folder + 'klst/'
+vg_path = top_folder + 'vg/'
 outputfolder = top_folder + 'Processed/'
 
 today = date.today().strftime('%Y-%m-%d')
@@ -117,7 +116,6 @@ def filter_AWSL_and_TimeInterval_CARRA_HOURS(nailstripped_path = nailstripped_pa
         filtered_df.to_feather(outputpath)
 
 
-<<<<<<< HEAD
 # In[ ]:
 
 
@@ -130,8 +128,6 @@ def filter_CARRA_HOURS(nailstripped_path = nailstripped_path):
         measurement_df.to_feather(outputpath)
 
 
-=======
->>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
 # In[ ]:
 
 
@@ -163,7 +159,6 @@ def combineParts_CARRA_HOURS(filteredWithMinAveWindSpeed_path = filtered_path_CA
     outputpath = outputfolder + f'/measurements_CARRA_HOURS_{today}.feather'
     df.to_feather(outputpath)
 
-<<<<<<< HEAD
 
 # In[ ]:
 
@@ -180,5 +175,30 @@ def combineParts_ONLY_CARRA_HOURS(filteredByCARRAHOURS_path = filtered_path_Only
     outputpath = outputfolder + f'/measurements_ONLY_CARRA_HOURS_{today}.feather'
     df.to_feather(outputpath)
 
-=======
->>>>>>> b88d11fd9cb88af60b43bdb79727104f94e533a6
+
+# In[15]:
+
+
+def combine_klst_ONLY_CARRA_HOURS(kslt_path = klst_path, vg_path = vg_path):
+    klst_files = [klst_path + file for file in os.listdir(klst_path) if file.endswith('.txt') and file.startswith('f_klst')]
+    vg_files = [vg_path + file for file in os.listdir(vg_path) if file.endswith('.txt') and file.startswith('f_vg')]
+
+    df = pd.DataFrame()
+
+    for klst_file in tqdm(klst_files, desc =  'IMO files...'):
+        c_df = pd.read_csv(klst_file)
+        c_df.timi = pd.to_datetime(c_df.timi)
+        c_df = c_df[c_df.timi.dt.hour.isin([i * 3 for i in range(8)])]
+        df = pd.concat([df, c_df])
+    
+    for vg_file in tqdm(vg_files, desc='IRCA files...'):
+        c_df = pd.read_csv(vg_file)
+        c_df.timi = pd.to_datetime(c_df.timi)
+        c_df = c_df[c_df.timi.dt.hour.isin([i * 3 for i in range(8)])]
+        c_df['dsdev'] = None
+        df = pd.concat([df, c_df])
+
+    outputpath = outputfolder + f'/measurements_klst_ONLY_CARRA_HOURS_{today}.feather'
+    df.to_feather(outputpath)
+    print(df)
+

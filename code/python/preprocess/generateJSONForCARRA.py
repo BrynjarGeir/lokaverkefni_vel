@@ -53,14 +53,14 @@ def getXY(stod, stationsLonLatXY):
     return stationsLonLatXY[stod][2:]
 
 
-# In[ ]:
+# In[7]:
 
 
 def getLatLon(stod, stationsLonLatXY):
     return stationsLonLatXY[stod][:2][::-1]
 
 
-# In[7]:
+# In[8]:
 
 
 def generateListOfDatetimesCoordinates(file_path = file_path, stations_LonLatXY_path = stationsLonLatXY_path):
@@ -79,7 +79,7 @@ def generateListOfDatetimesCoordinates(file_path = file_path, stations_LonLatXY_
     return grouped_df
 
 
-# In[8]:
+# In[9]:
 
 
 def generateAllJSON():
