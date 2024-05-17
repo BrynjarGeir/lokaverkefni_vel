@@ -39,7 +39,8 @@ def get_data_path():
 
 # Get data for plotting and such
 def get_data():
-    df = pd.read_feather(get_data_path())
+    data_path = get_data_path()
+    df = pd.read_feather(data_path)
     df = df.reset_index()
     df['twd'] = df.apply(transformedWindDirection, axis = 1)
     df = df[df.f < df.fg]

@@ -9,10 +9,11 @@ def calculateBruntVaisala(dT, dz, Tave, g = 9.82):
 def calculatePotentialTemperature(T, P0, P, Rcp = 0.286):
     return T * (P0 / P) ** Rcp
 
-def rowRichardson(row):
-    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
-    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
-    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
+def rowRichardson(cc):
+    t_15, t_250, t_500, p_15, p_250, p_500, ws_15, ws_250, ws_500 = cc
+    theta_0 = calculatePotentialTemperature(t_15, 100000, p_15)
+    theta_1 = calculatePotentialTemperature(t_250, 100000, p_250)
+    theta_2 = calculatePotentialTemperature(t_500, 100000, p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
     dT02 = theta_2 - theta_0
@@ -20,9 +21,9 @@ def rowRichardson(row):
     Tave12 = (theta_1 + theta_2) / 2
     Tave02 = (theta_0 + theta_2) / 2
     dz01, dz12, dz02 = 250 - 15, 500 - 250, 500-15
-    dU01 = row.ws_250 - row.ws_15
-    dU12 = row.ws_500 - row.ws_250
-    dU02 = row.ws_500 - row.ws_15
+    dU01 = ws_250 - ws_15
+    dU12 = ws_500 - ws_250
+    dU02 = ws_500 - ws_15
     g = 9.82
 
     try:
@@ -48,10 +49,13 @@ def rowRichardson(row):
 
     return Ri_01, Ri_12, Ri_02
 
-def rowBruntVaisala(row):
-    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
-    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
-    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
+
+def rowBruntVaisala(cc):
+    t_15, t_250, t_500, p_15, p_250, p_500, ws_15, ws_250, ws_500 = cc
+
+    theta_0 = calculatePotentialTemperature(t_15, 100000, p_15)
+    theta_1 = calculatePotentialTemperature(t_250, 100000, p_250)
+    theta_2 = calculatePotentialTemperature(t_500, 100000, p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
     dT02 = theta_2 - theta_0
@@ -84,10 +88,12 @@ def rowBruntVaisala(row):
 
     return N_01, N_12, N_02
 
-def rowBruntVaisalaSquared(row):
-    theta_0 = calculatePotentialTemperature(row.t_15, 100000, row.p_15)
-    theta_1 = calculatePotentialTemperature(row.t_250, 100000, row.p_250)
-    theta_2 = calculatePotentialTemperature(row.t_500, 100000, row.p_500)
+
+def rowBruntVaisalaSquared(cc):
+    t_15, t_250, t_500, p_15, p_250, p_500, ws_15, ws_250, ws_500 = cc
+    theta_0 = calculatePotentialTemperature(t_15, 100000, p_15)
+    theta_1 = calculatePotentialTemperature(t_250, 100000, p_250)
+    theta_2 = calculatePotentialTemperature(t_500, 100000, p_500)
     dT01 = theta_1 - theta_0
     dT12 = theta_2 - theta_1
     dT02 = theta_2 - theta_0
@@ -119,4 +125,3 @@ def rowBruntVaisalaSquared(row):
         N_02 = np.nan
 
     return N_01, N_12, N_02
-    
